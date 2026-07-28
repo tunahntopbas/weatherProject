@@ -35,8 +35,8 @@ anlamsızdır, uygulama ayakta olmadan DNS ile erişim test edilemez.
 | Container | Docker | Uygulamayı taşınabilir pakete koyma | Kubernetes'in çalışma birimi container'dır; Docker olmadan K8s'e deploy edilemez |
 | Sanallaştırma | VirtualBox + Ubuntu | Kubernetes cluster'ının çalışacağı makineler | Gerçek sunucu yerine yerel ortamda "gerçek makine gibi" 3 ayrı node simüle etmek için |
 | Orkestrasyon | Kubernetes (Rancher ile kurulum) | Container'ları çalıştırma, ölçekleme, yönetme | Kurumsal ortamda container yönetimi standardı; Rancher, kurulumu ve yönetimi kolaylaştıran bir arayüz/araç katmanı sunar |
-| Loglama | ElasticSearch + Kibana | Uygulama loglarını toplama ve arama/görselleştirme | Dağıtık sistemde (birden fazla pod/node) loglar dağınık olur; merkezi toplama olmadan hata ayıklamak imkansızlaşır |
-| Monitoring | Grafana | Metrikleri (CPU, RAM, istek sayısı vb.) dashboard'da izleme | Sistemin "sağlıklı çalışıp çalışmadığını" görsel olarak takip etmek için |
+| Loglama | ElasticSearch + Kibana + Filebeat | Uygulama loglarını toplama ve arama/görselleştirme | Dağıtık sistemde (birden fazla pod/node) loglar dağınık olur; merkezi toplama olmadan hata ayıklamak imkansızlaşır. Filebeat, her node'daki container loglarını okuyup ElasticSearch'e gönderen log toplayıcıdır (log shipper) — o olmadan loglar container'ların içinde kilitli kalır ve pod silindiğinde kaybolur |
+| Monitoring | Prometheus + Grafana | Metrikleri (CPU, RAM, istek sayısı vb.) toplama ve dashboard'da izleme | Grafana tek başına metrik toplamaz, sadece görselleştirir; Prometheus, node-exporter, kube-state-metrics ve backend'in kendi `/metrics` endpoint'inden metrikleri periyodik olarak toplayıp saklayan bileşendir — Grafana bu veriyi sorgulayıp gösterir |
 | CI/CD | Azure DevOps Pipelines | Kod push edilince otomatik build/test/deploy | Manuel deploy hataya açık ve yavaştır; pipeline bunu otomatikleştirir |
 | Ağ | DNS (local + global) | Uygulamaya isimle erişim (IP yerine) | `weather.local` gibi bir isimle erişmek IP ezberlemekten daha sürdürülebilir; global DNS ise dışarıdan erişim için gerekir |
 
@@ -64,14 +64,14 @@ prensiptir. Backend'de (.NET) uygulanacak somut örnekler:
 
 ## 4. Clean Architecture Katmanları
 
-Katmanlar dıştan içe değil, **içten dışa bağımlılık kuralı** ile çalışır:
-dış katmanlar iç katmanlara bağımlı olabilir, iç katmanlar dış katmanlardan
-habersizdir.
+Katmanlar **bağımlılık kuralı (Dependency Rule)** ile çalışır: bağımlılıklar
+daima dıştan içe doğrudur — dış katmanlar iç katmanlara bağımlı olabilir, iç
+katmanlar dış katmanlardan habersizdir.
 
 ```
 WeatherProject.Api            <- Presentation: HTTP controller'lar, Program.cs
   -> WeatherProject.Infrastructure  <- Dış dünya: PostgreSQL (EF Core), Redis, dış hava durumu API'si
-    -> WeatherProject.Application  <- İş kuralları, use case'ler, arayüzler (IWeatherProvider, IWeatherCache)
+    -> WeatherProject.Application  <- İş kuralları, use case'ler, arayüzler (IWeatherProvider, IWeatherCacheRepository)
       -> WeatherProject.Domain     <- Saf iş nesneleri (Entity'ler), dışarıya hiçbir bağımlılığı yok
 ```
 
@@ -86,7 +86,7 @@ WeatherProject.Api            <- Presentation: HTTP controller'lar, Program.cs
 - **Api:** ASP.NET Core controller'ları, `Program.cs` içinde Dependency
   Injection kayıtları (`IWeatherProvider` -> `OpenWeatherMapProvider` gibi).
 
-Bu yapı Task 2'de (`02-backend-dotnet.md`) birebir solution/proje adları
+Bu yapı Plan 2'de (`02-backend-dotnet.md`) birebir solution/proje adları
 olarak kullanılacaktır: `WeatherProject.Domain`, `WeatherProject.Application`,
 `WeatherProject.Infrastructure`, `WeatherProject.Api`.
 
