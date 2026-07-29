@@ -1,23 +1,40 @@
+using Microsoft.EntityFrameworkCore;
+using WeatherProject.Application.Interfaces;
+using WeatherProject.Application.Weather;
+using WeatherProject.Infrastructure.Caching;
+using WeatherProject.Infrastructure.ExternalApis;
+using WeatherProject.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+builder.Services.Configure<OpenWeatherMapOptions>(
+    builder.Configuration.GetSection(OpenWeatherMapOptions.SectionName));
+
+builder.Services.AddDbContext<WeatherDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
+
+builder.Services.AddHttpClient<IWeatherProvider, OpenWeatherMapProvider>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OpenWeatherMapOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
+});
+
+builder.Services.AddScoped<IWeatherCacheRepository, RedisWeatherCacheRepository>();
+builder.Services.AddScoped<ISearchHistoryRepository, SearchHistoryRepository>();
+builder.Services.AddScoped<GetCurrentWeatherHandler>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
+
+public partial class Program
+{
+}
