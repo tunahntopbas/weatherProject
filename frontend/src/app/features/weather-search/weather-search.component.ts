@@ -23,7 +23,7 @@ export class WeatherSearchComponent {
     }
 
     this.errorMessage.set(null);
-    this.weatherService.getCurrentWeather(this.cityName).subscribe({
+    this.weatherService.getCurrentWeather(this.cityName.trim()).subscribe({
       next: (result) => this.forecast.set(result),
       error: () => {
         this.forecast.set(null);

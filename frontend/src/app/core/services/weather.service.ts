@@ -9,6 +9,6 @@ export class WeatherService {
   private readonly http = inject(HttpClient);
 
   getCurrentWeather(cityName: string): Observable<WeatherForecast> {
-    return this.http.get<WeatherForecast>(`${environment.apiBaseUrl}/api/weather/${cityName}`);
+    return this.http.get<WeatherForecast>(`${environment.apiBaseUrl}/api/weather/${encodeURIComponent(cityName)}`);
   }
 }
