@@ -1,0 +1,38 @@
+<section class="station" aria-label="Hava durumu sorgulama">
+  <p class="station__eyebrow">HAVA DURUMU</p>
+
+  <form class="station__form" (ngSubmit)="search()">
+    <label class="station__field">
+      <span class="station__field-label">Şehir</span>
+      <input
+        class="station__input"
+        type="text"
+        name="cityName"
+        [(ngModel)]="cityName"
+        placeholder="İstanbul, Ankara, İzmir..."
+        autocomplete="off"
+      />
+    </label>
+    <button class="station__submit" type="submit">Ara</button>
+  </form>
+
+  <div class="station__divider" aria-hidden="true"></div>
+
+  @if (forecast(); as f) {
+    <div class="station__reading">
+      <span class="station__temp">{{ f.temperatureCelsius | number: '1.0-0' }}°</span>
+      <div class="station__details">
+        <span class="station__city">{{ f.cityName }}</span>
+        <span class="station__desc">{{ f.description }}</span>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage(); as msg) {
+    <p class="station__error" role="alert">{{ msg }}</p>
+  }
+
+  @if (!forecast() && !errorMessage()) {
+    <p class="station__hint">Bir şehir arayın, anlık sıcaklığı görün.</p>
+  }
+</section>
