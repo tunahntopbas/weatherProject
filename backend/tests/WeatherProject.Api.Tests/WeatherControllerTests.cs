@@ -11,6 +11,7 @@ namespace WeatherProject.Api.Tests;
 public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
+    private readonly Mock<ISearchHistoryRepository> _fakeHistory;
 
     public WeatherControllerTests(WebApplicationFactory<Program> factory)
     {
@@ -24,7 +25,7 @@ public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Progra
             .Setup(c => c.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((WeatherForecast?)null);
 
-        var fakeHistory = new Mock<ISearchHistoryRepository>();
+        _fakeHistory = new Mock<ISearchHistoryRepository>();
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
@@ -32,7 +33,7 @@ public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Progra
             {
                 services.AddSingleton(fakeProvider.Object);
                 services.AddSingleton(fakeCache.Object);
-                services.AddSingleton(fakeHistory.Object);
+                services.AddSingleton(_fakeHistory.Object);
             });
         });
     }
@@ -48,5 +49,9 @@ public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Progra
         var forecast = await response.Content.ReadFromJsonAsync<WeatherForecast>();
         Assert.NotNull(forecast);
         Assert.Equal("Istanbul", forecast!.CityName);
+
+        _fakeHistory.Verify(
+            h => h.AddAsync(It.Is<SearchHistoryEntry>(e => e.CityName == "Istanbul"), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }
