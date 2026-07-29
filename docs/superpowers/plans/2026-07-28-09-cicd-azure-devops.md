@@ -158,7 +158,7 @@ stages:
           - task: UseDotNet@2
             inputs:
               packageType: 'sdk'
-              version: '8.0.x'
+              version: '10.0.x'
           - script: dotnet restore backend/WeatherProject.sln
             displayName: 'dotnet restore'
           - script: dotnet build backend/WeatherProject.sln --configuration Release --no-restore

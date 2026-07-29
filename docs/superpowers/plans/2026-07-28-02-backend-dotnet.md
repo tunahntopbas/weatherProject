@@ -6,7 +6,7 @@
 
 **Architecture:** 4 katmanlı Clean Architecture. `Domain` hiçbir şeye bağımlı değil. `Application` sadece `Domain`'e ve kendi arayüzlerine bağımlı. `Infrastructure` bu arayüzleri PostgreSQL (EF Core), Redis ve dış hava durumu API'si ile doldurur. `Api` hepsini `Program.cs` içinde DI ile birbirine bağlar.
 
-**Tech Stack:** .NET 8, ASP.NET Core Web API, Entity Framework Core (Npgsql provider), StackExchange.Redis (`Microsoft.Extensions.Caching.StackExchangeRedis`), xUnit, Moq.
+**Tech Stack:** .NET 10, ASP.NET Core Web API, Entity Framework Core (Npgsql provider), StackExchange.Redis (`Microsoft.Extensions.Caching.StackExchangeRedis`), xUnit, Moq.
 
 ## Global Constraints
 
