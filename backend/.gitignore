@@ -1,0 +1,26 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# ReSharper
+.idea/
+*.DotSettings.user
+
+# User-specific files
+.vscode/
+launch.json
+settings.json
+
+# IDE
+.DS_Store
+Thumbs.db
+
+# Local environment
+local.settings.json
+*.log
