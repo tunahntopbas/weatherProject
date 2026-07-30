@@ -32,6 +32,13 @@ builder.Services.AddScoped<GetCurrentWeatherHandler>();
 
 var app = builder.Build();
 
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<WeatherDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.MapControllers();
 app.Run();
 
