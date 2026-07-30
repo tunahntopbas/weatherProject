@@ -218,11 +218,21 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weatherproject -d weatherproject"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
 
   backend:
     build:
@@ -234,8 +244,10 @@ services:
     ports:
       - "5000:8080"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
     build:
@@ -248,6 +260,8 @@ services:
 volumes:
   postgres-data:
 ```
+
+**Neden `healthcheck` + `condition: service_healthy` (plan yazilirken atlanan bir detay):** `depends_on` tek basina sadece container'in *baslatildigini* bekler, icindeki servisin *baglanti kabul etmeye hazir* oldugunu degil. Postgres process'i basladiktan birkac saniye sonra dinlemeye baslar; bu sirada backend hemen `Database.Migrate()` calistirip `Connection refused` ile coker. Healthcheck, Postgres/Redis gercekten hazir olana kadar backend'in baslamasini erteler.
 
 - [ ] **Step 3: `.env` dosyanı oluştur (gerçek anahtarla, commit edilmeyecek)**
 
