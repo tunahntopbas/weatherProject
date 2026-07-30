@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 using Moq;
 using WeatherProject.Application.Interfaces;
 using WeatherProject.Domain.Entities;
@@ -29,6 +30,7 @@ public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Progra
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
+            builder.UseEnvironment("Testing");
             builder.ConfigureServices(services =>
             {
                 services.AddSingleton(fakeProvider.Object);
