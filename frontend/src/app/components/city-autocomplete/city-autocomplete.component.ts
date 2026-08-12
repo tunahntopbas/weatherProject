@@ -11,12 +11,12 @@ import { TURKISH_PROVINCES } from '../../core/data/turkish-provinces';
 export class CityAutocompleteComponent {
   readonly citySelected = output<string>();
 
-  query = '';
+  readonly query = signal('');
   readonly isOpen = signal(false);
   readonly activeIndex = signal(-1);
 
   readonly suggestions = computed(() => {
-    const q = this.query.trim().toLocaleLowerCase('tr');
+    const q = this.query().trim().toLocaleLowerCase('tr');
     if (!q) return [] as string[];
     return TURKISH_PROVINCES.filter((city) => city.toLocaleLowerCase('tr').startsWith(q)).slice(0, 8);
   });
@@ -47,7 +47,7 @@ export class CityAutocompleteComponent {
     }
 
     const exact = TURKISH_PROVINCES.find(
-      (city) => city.toLocaleLowerCase('tr') === this.query.trim().toLocaleLowerCase('tr'),
+      (city) => city.toLocaleLowerCase('tr') === this.query().trim().toLocaleLowerCase('tr'),
     );
     if (exact) {
       this.select(exact);
@@ -55,7 +55,7 @@ export class CityAutocompleteComponent {
   }
 
   select(city: string): void {
-    this.query = city;
+    this.query.set(city);
     this.isOpen.set(false);
     this.activeIndex.set(-1);
     this.citySelected.emit(city);
