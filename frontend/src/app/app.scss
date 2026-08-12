@@ -1,7 +1,4 @@
-.page {
+:host {
+  display: block;
   min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1.5rem;
 }

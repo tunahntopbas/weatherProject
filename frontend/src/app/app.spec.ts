@@ -17,10 +17,10 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the weather search component', async () => {
+  it('should render the weather dashboard component', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-weather-search')).toBeTruthy();
+    expect(compiled.querySelector('app-weather-dashboard')).toBeTruthy();
   });
 });
