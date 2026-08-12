@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { WeatherSearchComponent } from './features/weather-search/weather-search.component';
+import { WeatherDashboardComponent } from './features/weather-dashboard/weather-dashboard.component';
 
 @Component({
   selector: 'app-root',
-  imports: [WeatherSearchComponent],
+  imports: [WeatherDashboardComponent],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
-export class App {
-}
+export class App {}
