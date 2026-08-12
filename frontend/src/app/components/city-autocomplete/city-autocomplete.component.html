@@ -2,7 +2,8 @@
   <input
     class="autocomplete__input"
     type="text"
-    [(ngModel)]="query"
+    [ngModel]="query()"
+    (ngModelChange)="query.set($event)"
     (input)="onInput()"
     (keydown.ArrowDown)="onArrowDown($event)"
     (keydown.ArrowUp)="onArrowUp($event)"
