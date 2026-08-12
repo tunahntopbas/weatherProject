@@ -34,6 +34,13 @@ public class OpenMeteoProvider : IWeatherProvider
         [99] = "thunderstorm with heavy hail",
     };
 
+    private static readonly Dictionary<char, char> TurkishToAsciiMap = new()
+    {
+        ['İ'] = 'I', ['ı'] = 'i', ['Ğ'] = 'G', ['ğ'] = 'g',
+        ['Ş'] = 'S', ['ş'] = 's', ['Ç'] = 'C', ['ç'] = 'c',
+        ['Ö'] = 'O', ['ö'] = 'o', ['Ü'] = 'U', ['ü'] = 'u',
+    };
+
     private readonly HttpClient _httpClient;
     private readonly OpenMeteoOptions _options;
 
@@ -48,22 +55,68 @@ public class OpenMeteoProvider : IWeatherProvider
         var (latitude, longitude) = await GeocodeAsync(cityName, cancellationToken);
 
         var forecastUri =
-            $"{_options.ForecastBaseUrl}/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,weather_code";
+            $"{_options.ForecastBaseUrl}/v1/forecast?latitude={latitude}&longitude={longitude}" +
+            "&current=temperature_2m,weather_code,is_day,wind_speed_10m,relative_humidity_2m" +
+            "&daily=temperature_2m_max,temperature_2m_min,weather_code" +
+            "&forecast_days=7&timezone=auto";
         var response = await _httpClient.GetAsync(forecastUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
         using var document = JsonDocument.Parse(body);
-        var current = document.RootElement.GetProperty("current");
+        var root = document.RootElement;
+        var current = root.GetProperty("current");
 
         var temperature = current.GetProperty("temperature_2m").GetDouble();
         var weatherCode = current.GetProperty("weather_code").GetInt32();
+        var isDay = current.GetProperty("is_day").GetInt32() == 1;
+        var windSpeed = current.GetProperty("wind_speed_10m").GetDouble();
+        var humidity = current.GetProperty("relative_humidity_2m").GetDouble();
         var description = WeatherCodeDescriptions.GetValueOrDefault(weatherCode, "unknown");
+        var daily = ParseDailyForecasts(root.GetProperty("daily"));
 
-        return new WeatherForecast(cityName, DateTime.UtcNow, temperature, description);
+        return new WeatherForecast(
+            cityName, DateTime.UtcNow, temperature, description,
+            weatherCode, isDay, windSpeed, humidity, daily);
+    }
+
+    private static List<DailyForecast> ParseDailyForecasts(JsonElement daily)
+    {
+        var dates = daily.GetProperty("time");
+        var codes = daily.GetProperty("weather_code");
+        var maxTemps = daily.GetProperty("temperature_2m_max");
+        var minTemps = daily.GetProperty("temperature_2m_min");
+
+        var result = new List<DailyForecast>();
+        for (var i = 0; i < dates.GetArrayLength(); i++)
+        {
+            result.Add(new DailyForecast(
+                DateTime.Parse(dates[i].GetString()!),
+                codes[i].GetInt32(),
+                maxTemps[i].GetDouble(),
+                minTemps[i].GetDouble()));
+        }
+        return result;
     }
 
     private async Task<(double Latitude, double Longitude)> GeocodeAsync(string cityName, CancellationToken cancellationToken)
+    {
+        var result = await TryGeocodeAsync(cityName, cancellationToken);
+        if (result is not null)
+            return result.Value;
+
+        var normalized = NormalizeTurkishCharacters(cityName);
+        if (normalized != cityName)
+        {
+            result = await TryGeocodeAsync(normalized, cancellationToken);
+            if (result is not null)
+                return result.Value;
+        }
+
+        throw new HttpRequestException($"City '{cityName}' not found.", null, HttpStatusCode.NotFound);
+    }
+
+    private async Task<(double Latitude, double Longitude)?> TryGeocodeAsync(string cityName, CancellationToken cancellationToken)
     {
         var geocodeUri = $"{_options.GeocodingBaseUrl}/v1/search?name={Uri.EscapeDataString(cityName)}&count=1&format=json";
         var response = await _httpClient.GetAsync(geocodeUri, cancellationToken);
@@ -73,11 +126,15 @@ public class OpenMeteoProvider : IWeatherProvider
         using var document = JsonDocument.Parse(body);
 
         if (!document.RootElement.TryGetProperty("results", out var results) || results.GetArrayLength() == 0)
-        {
-            throw new HttpRequestException($"City '{cityName}' not found.", null, HttpStatusCode.NotFound);
-        }
+            return null;
 
         var first = results[0];
         return (first.GetProperty("latitude").GetDouble(), first.GetProperty("longitude").GetDouble());
+    }
+
+    private static string NormalizeTurkishCharacters(string input)
+    {
+        var chars = input.Select(c => TurkishToAsciiMap.TryGetValue(c, out var replacement) ? replacement : c).ToArray();
+        return new string(chars);
     }
 }
