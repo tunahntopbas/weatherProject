@@ -1,0 +1,26 @@
+<app-animated-background [theme]="theme()" />
+
+<main class="dashboard">
+  <app-city-autocomplete (citySelected)="onCitySelected($event)" />
+
+  @if (recentCities().length > 0) {
+    <div class="dashboard__recent">
+      @for (city of recentCities(); track city) {
+        <button type="button" class="dashboard__recent-chip" (click)="onCitySelected(city)">{{ city }}</button>
+      }
+    </div>
+  }
+
+  @if (forecast(); as f) {
+    <app-weather-hero [forecast]="f" [theme]="theme()" />
+    <app-forecast-strip [days]="f.daily" />
+  }
+
+  @if (!forecast() && !errorMessage()) {
+    <p class="dashboard__hint">Bir il secin, anlik hava durumunu ve haftalik tahmini gorun.</p>
+  }
+
+  @if (errorMessage(); as msg) {
+    <p class="dashboard__error" role="alert">{{ msg }}</p>
+  }
+</main>
