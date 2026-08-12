@@ -1,0 +1,14 @@
+<div class="strip">
+  <svg class="strip__line" [attr.viewBox]="viewBox" preserveAspectRatio="none" aria-hidden="true">
+    <path [attr.d]="linePath()" class="strip__path" fill="none" />
+  </svg>
+  <div class="strip__days">
+    @for (point of points(); track point.label + $index) {
+      <div class="strip__day">
+        <span class="strip__day-label">{{ point.label }}</span>
+        <span class="strip__day-max">{{ point.tempMax | number: '1.0-0' }}°</span>
+        <span class="strip__day-min">{{ point.tempMin | number: '1.0-0' }}°</span>
+      </div>
+    }
+  </div>
+</div>
