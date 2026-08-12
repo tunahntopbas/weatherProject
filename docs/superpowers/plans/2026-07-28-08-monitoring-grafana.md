@@ -482,3 +482,20 @@ curl http://192.168.56.11:30080/api/weather/Izmir
 Grafana'daki "WeatherProject - Backend" dashboard'una dön, "Backend HTTP İstek Oranı" panelinde birkaç saniye içinde bir yükselme görülmeli (dashboard'un sağ üstünden "Refresh" ile yenile veya otomatik yenilemeyi 5s'e ayarla).
 
 Expected: panelde az önce atılan 3 isteğe karşılık gelen bir artış görünür; "Backend Ayakta mı" paneli `1` değerini gösterir.
+
+---
+
+## Gercek uygulamada plandan sapmalar (2026-08-12)
+
+Plan 06/07'deki gibi tek VM/k3s ortamina uyarlandi. Ogrenme hedefleri (node-exporter,
+kube-state-metrics, Prometheus scrape config, uygulamaya metrik ekleme, Grafana dashboard)
+birebir karsilandi.
+
+| Plan'da | Gercekte yapilan | Neden |
+|---|---|---|
+| 3 node IP'si (`192.168.56.11/12/13:9100`) | Tek node IP'si (`10.0.2.15:9100`) | Plan 06 sapmasi — tek node |
+| `job="weatherproject-backend"`, namespace `weatherproject` | `job="weather-backend"`, namespace `weather-app` | Plan 06'da degistirilen isimlendirme |
+| Backend image: rebuild → Docker Hub push → `imagePullPolicy: Always` | Rebuild → `docker save \| k3s ctr images import` → `imagePullPolicy: Never` (degismedi) | Plan 06 sapmasiyla tutarli — registry yok, yerel image |
+| Grafana: `Service type: NodePort` (`30300`) | Grafana: **Ingress** (`grafana.127.0.0.1.nip.io`) | Plan 06/07 sapmasinin devami |
+| Task 6 Step 3: 3 gercek `/api/weather/*` istegiyle panel dogrulama | Sentetik trafik (`backend:5000/` — hata vermeyen bir path) ile dogrulama | **Onemli bulgu:** `/api/weather/{city}` istekleri OpenWeatherMap'e giden kurumsal ag engeli yuzunden **yakalanmamis exception** firlatiyor; baglanti Kestrel seviyesinde aniden kesildigi icin `UseHttpMetrics()` middleware'i olcumu kaydedemiyor (`http_request_duration_seconds_count` hic olusmuyor). Hatasiz tamamlanan istekler (orn. 404 donen `/`) sorunsuz sayiliyor. Bu backend'de global exception handling eksikligini gosteren ayri, gercek bir bulgu — bu planin kapsami disinda, ileride ele alinabilir |
+| — | **Kok neden teyidi:** Kullanicinin makinesinde **Ivanti Secure Access** VPN'i zorunlu (VPN'siz internet erisimi yok) — bu yuzden "kendi wifi'ne gec" gibi cozumler ise yaramiyor, engel her oturumda kalici. Alternatif saglayici erisebilirlik testi: `api.open-meteo.com` (API key gerektirmiyor), `api.weatherapi.com`, `api.weather.gov` — ucu de bu agdan calisti, sadece `api.openweathermap.org` ozel olarak engelli. Provider degisikligi ayri bir karar, hafizaya not dusuldu (bkz. proje hafizasi `project-corporate-network-blocks-openweathermap`) |
