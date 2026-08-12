@@ -27,4 +27,36 @@ public class WeatherForecastTests
         Assert.Throws<ArgumentException>(() =>
             new WeatherForecast(cityName!, DateTime.Today, 20.0, "Sunny"));
     }
+
+    [Fact]
+    public void Constructor_WithExtendedData_SetsNewProperties()
+    {
+        var daily = new List<DailyForecast>
+        {
+            new DailyForecast(new DateTime(2026, 8, 13), 1, 30.0, 20.0)
+        };
+
+        var forecast = new WeatherForecast(
+            "Istanbul", DateTime.Today, 28.5, "Clear",
+            weatherCode: 0, isDay: true, windSpeedKmh: 12.5, humidityPercent: 55, daily: daily);
+
+        Assert.Equal(0, forecast.WeatherCode);
+        Assert.True(forecast.IsDay);
+        Assert.Equal(12.5, forecast.WindSpeedKmh);
+        Assert.Equal(55, forecast.HumidityPercent);
+        Assert.Single(forecast.Daily);
+        Assert.Equal(1, forecast.Daily[0].WeatherCode);
+        Assert.Equal(30.0, forecast.Daily[0].TempMaxCelsius);
+        Assert.Equal(20.0, forecast.Daily[0].TempMinCelsius);
+    }
+
+    [Fact]
+    public void Constructor_WithoutOptionalParams_DefaultsToEmptyDailyAndSensibleDefaults()
+    {
+        var forecast = new WeatherForecast("Istanbul", DateTime.Today, 28.5, "Clear");
+
+        Assert.Empty(forecast.Daily);
+        Assert.Equal(0, forecast.WeatherCode);
+        Assert.True(forecast.IsDay);
+    }
 }
