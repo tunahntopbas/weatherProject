@@ -345,3 +345,46 @@ git push azure master
 ```
 
 Expected: Azure DevOps'ta sadece `weatherproject-backend-ci` tetiklenir, `weatherproject-frontend-ci` **tetiklenmez** — `paths.include` filtresinin çalıştığının kanıtı.
+
+---
+
+## Gercek uygulamada plandan sapma: Azure DevOps yerine GitHub Actions (2026-08-12)
+
+Azure DevOps organizasyon olusturma akisi, kullanicinin hesabinda beklenmedik bir sekilde
+bir Azure aboneligine baglanmayi zorunlu kiliyordu (yeni/bos hesaplarda cikan bir kural) ve
+tekrarlanan pazarlama sayfasi yonlendirmeleri yasandi. Proje zaten GitHub'da barindigi icin
+(`github.com/tunahntopbas/weatherProject`) **GitHub Actions**'a gecildi — kavramsal olarak
+ayni is akisi (push → build → test → image → deploy), hicbir yeni hesap gerekmedi.
+
+### Mimari karsilastirmasi
+
+| Azure DevOps kavrami | GitHub Actions karsiligi |
+|---|---|
+| Pipeline (YAML) | Workflow (YAML) |
+| Stage | Job |
+| Task | Step |
+| Self-hosted agent | Self-hosted runner |
+| Service Connection (Docker Hub) | **Gerekmedi** — image registry'ye push etmiyoruz |
+| Secure File (kubeconfig) | **Gerekmedi** — runner zaten VM'in uzerinde, kubeconfig oradan zaten okunabiliyor |
+| `trigger.paths.include` | `on.push.paths` |
+
+### Kurulum adimlari (fiilen yapilan)
+
+- [x] **Self-hosted runner'i VM'e kurulum**: `gh api -X POST repos/.../actions/runners/registration-token` ile token alindi, runner (`actions-runner-linux-x64-2.336.0.tar.gz`) VM'e indirilip `./config.sh` ile GitHub'a kayit edildi, `./svc.sh install && ./svc.sh start` ile systemd servisi olarak surekli calisir hale getirildi.
+- [x] **`.github/workflows/backend.yml` ve `frontend.yml` yazildi**: `on.push.paths` ile klasor bazli tetikleme (plandaki gibi), `runs-on: self-hosted`, adimlar: checkout → restore/build/test (ya da npm ci/test/build) → `docker build` → `docker save | sudo k3s ctr images import -` → `kubectl rollout restart` + `rollout status`.
+- [x] **`workflow_dispatch: {}` eklendi**: manuel tetikleme icin (test amacli, path degisikligi olmadan pipeline'i calistirabilmek icin).
+
+### Karsilasilan ve cozulen sorunlar
+
+| Sorun | Kok neden | Cozum |
+|---|---|---|
+| Runner "offline" gorunuyor, servis "session deleted" hatasiyla cokuyordu | **VM saati ~1 saat 16 dakika geride** (`System clock synchronized: no` — NTP portu/UDP 123 kurumsal ag tarafindan engelli, digerleri gibi) — GitHub'in oturum/token dogrulamasi zaman damgasina cok duyarli | `sudo date -u -s "$(curl -sI https://github.com \| grep -i date)"` ile HTTPS response header'indan gercek zamani alip elle duzeltildi, `hwclock --systohc` ile donanim saatine de yazildi |
+| `actions/setup-dotnet` self-hosted runner'da `mkdir: Permission denied` ile basarisiz oluyordu (ayni komut interaktif SSH'ta sorunsuzdu) | systemd servis baglaminda calisan is adimlarinin ortami, interaktif shell'den farkli davraniyor (net sebep tam netlestirilemedi) | Pratik/gercekci cozum: `actions/setup-dotnet` adimini pipeline'dan tamamen cikarip .NET SDK'yi **runner makinesine bir kez kalici** kurmak (`dotnet-install.sh --install-dir ~/.dotnet` + `/usr/local/bin/dotnet` symlink) — ayni zamanda her calistirmayi hizlandirir |
+| `npm test`, Angular CLI'nin Node surum gereksinimini karsilamiyordu | Node 20 kuruluydu, Angular CLI en az Node 22.22.3 istiyor | Node 22'ye yukseltildi (NodeSource apt deposu) |
+
+### Sonuc
+
+Her iki pipeline da (`backend.yml`, `frontend.yml`) ucdan uca yesil: restore/build/test →
+Docker image → k3s containerd'e import → `kubectl rollout restart`. Dogrulama:
+`curl -H "Host: weather.127.0.0.1.nip.io" http://localhost/api/weather/Izmir` pipeline'in
+deploy ettigi taze Pod'lardan gercek veri donduruyor.
