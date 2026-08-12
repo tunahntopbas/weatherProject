@@ -1,0 +1,40 @@
+# Bu dosya ORNEK/SABLONDUR - gercek bir alan adi + Cloudflare Tunnel token'i
+# olmadan "kubectl apply" ETME (hazir bekliyor, ileride domain alinirsa
+# birkac dakikada devreye alinabilir).
+#
+# Kullanim (gercek domain/token elde edildiginde):
+#   1. https://one.dash.cloudflare.com > Networks > Tunnels > Create a tunnel
+#   2. kubectl create secret generic cloudflared-secret -n weather-app \
+#        --from-literal=tunnel-token='<tunnel-olusturunca-verilen-token>'
+#   3. kubectl apply -f k8s/cloudflared-deployment.example.yaml
+#   4. Cloudflare dashboard'da Public Hostname ekle:
+#      Subdomain: weather, Domain: <alan-adin.com>, Type: HTTP,
+#      URL: frontend.weather-app.svc.cluster.local:80
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: weather-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2024.8.3
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-secret
+                  key: tunnel-token
