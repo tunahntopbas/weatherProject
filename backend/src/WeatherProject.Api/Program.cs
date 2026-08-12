@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 using WeatherProject.Application.Interfaces;
 using WeatherProject.Application.Weather;
 using WeatherProject.Infrastructure.Caching;
@@ -38,6 +39,9 @@ if (!app.Environment.IsEnvironment("Testing"))
     var dbContext = scope.ServiceProvider.GetRequiredService<WeatherDbContext>();
     dbContext.Database.Migrate();
 }
+
+app.UseHttpMetrics();
+app.MapMetrics();
 
 app.MapControllers();
 app.Run();
