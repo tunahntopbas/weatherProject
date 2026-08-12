@@ -10,8 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.Configure<OpenWeatherMapOptions>(
-    builder.Configuration.GetSection(OpenWeatherMapOptions.SectionName));
+builder.Services.Configure<OpenMeteoOptions>(
+    builder.Configuration.GetSection(OpenMeteoOptions.SectionName));
 
 builder.Services.AddDbContext<WeatherDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
@@ -21,11 +21,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
-builder.Services.AddHttpClient<IWeatherProvider, OpenWeatherMapProvider>((serviceProvider, client) =>
-{
-    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OpenWeatherMapOptions>>().Value;
-    client.BaseAddress = new Uri(options.BaseUrl);
-});
+builder.Services.AddHttpClient<IWeatherProvider, OpenMeteoProvider>();
 
 builder.Services.AddScoped<IWeatherCacheRepository, RedisWeatherCacheRepository>();
 builder.Services.AddScoped<ISearchHistoryRepository, SearchHistoryRepository>();

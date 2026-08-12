@@ -84,7 +84,7 @@ WeatherProject.Api            <- Presentation: HTTP controller'lar, Program.cs
   implementasyonları — PostgreSQL erişimi (EF Core `DbContext`), Redis
   bağlantısı, dış hava durumu API'sine HTTP çağrısı.
 - **Api:** ASP.NET Core controller'ları, `Program.cs` içinde Dependency
-  Injection kayıtları (`IWeatherProvider` -> `OpenWeatherMapProvider` gibi).
+  Injection kayıtları (`IWeatherProvider` -> `OpenMeteoProvider` gibi).
 
 Bu yapı Plan 2'de (`02-backend-dotnet.md`) birebir solution/proje adları
 olarak kullanılacaktır: `WeatherProject.Domain`, `WeatherProject.Application`,

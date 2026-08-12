@@ -31,7 +31,6 @@ services:
     environment:
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=weatherproject;Username=weatherproject;Password=changeme"
       ConnectionStrings__Redis: "redis:6379"
-      OpenWeatherMap__ApiKey: "${OPENWEATHERMAP_API_KEY}"
     ports:
       - "5000:8080"
     depends_on:

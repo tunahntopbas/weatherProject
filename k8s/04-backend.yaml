@@ -7,7 +7,11 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 5000
+    - name: mapped
+      port: 5000
+      targetPort: 8080
+    - name: container-native
+      port: 8080
       targetPort: 8080
 ---
 apiVersion: apps/v1
