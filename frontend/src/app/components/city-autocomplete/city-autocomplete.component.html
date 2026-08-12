@@ -1,0 +1,32 @@
+<div class="autocomplete">
+  <input
+    class="autocomplete__input"
+    type="text"
+    [(ngModel)]="query"
+    (input)="onInput()"
+    (keydown.ArrowDown)="onArrowDown($event)"
+    (keydown.ArrowUp)="onArrowUp($event)"
+    (keydown.Enter)="onEnter($event)"
+    (blur)="close()"
+    placeholder="Bir il yazin..."
+    autocomplete="off"
+    role="combobox"
+    aria-autocomplete="list"
+    [attr.aria-expanded]="isOpen()"
+  />
+  @if (isOpen() && suggestions().length > 0) {
+    <ul class="autocomplete__list" role="listbox">
+      @for (city of suggestions(); track city; let i = $index) {
+        <li
+          class="autocomplete__option"
+          [class.autocomplete__option--active]="i === activeIndex()"
+          role="option"
+          [attr.aria-selected]="i === activeIndex()"
+          (mousedown)="select(city)"
+        >
+          {{ city }}
+        </li>
+      }
+    </ul>
+  }
+</div>
