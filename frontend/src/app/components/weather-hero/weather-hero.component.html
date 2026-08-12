@@ -1,0 +1,15 @@
+<div class="hero">
+  <p class="hero__city">{{ forecast().cityName }}</p>
+  <p class="hero__temp">{{ forecast().temperatureCelsius | number: '1.0-0' }}°</p>
+  <h1 class="hero__headline">{{ theme().headlineTr }}</h1>
+  <div class="hero__stats">
+    <span class="hero__stat">
+      <span class="hero__stat-label">Ruzgar</span>
+      {{ forecast().windSpeedKmh | number: '1.0-0' }} km/s
+    </span>
+    <span class="hero__stat">
+      <span class="hero__stat-label">Nem</span>
+      %{{ forecast().humidityPercent | number: '1.0-0' }}
+    </span>
+  </div>
+</div>
