@@ -565,3 +565,24 @@ kubectl scale deployment backend -n weatherproject --replicas=1
 git add k8s/backend-deployment.yaml k8s/frontend-deployment.yaml
 git commit -m "feat(k8s): backend ve frontend deployment/service, uctan uca dogrulama"
 ```
+
+---
+
+## Gercek uygulamada plandan sapmalar (2026-08-12)
+
+Bu plan tek makinede, kaynak ve zaman kisitlari nedeniyle asagidaki degisikliklerle uygulandi.
+Ogrenme hedefleri (kubectl temel komutlari, Deployment/StatefulSet/Service/ConfigMap/Secret/Ingress kavramlari,
+Rancher UI, self-healing, yatay olcekleme) birebir karsilandi — degisen sadece altyapi/arac secimleriydi.
+
+| Plan'da | Gercekte yapilan | Neden |
+|---|---|---|
+| 3 ayri node (`node1/2/3`), Rancher **Custom Cluster** + RKE | Tek VM, **k3s** (all-in-one control-plane + worker) | Tek host makinede 3 VM'e ayiracak RAM/CPU yoktu; k3s ayni Kubernetes API'sini tek node'da verir, ogrenilen kavramlar birebir ayni |
+| Rancher, node'lari `docker run` ile cluster'a kaydediyor | Rancher, **Helm chart** (`rancher-latest/rancher`) ile zaten var olan k3s cluster'ina kuruldu | k3s tek basina calisan bagimsiz bir cluster; Rancher'i "yonetici panel" olarak ustune ekledik, cluster'i o kurmadi |
+| Image'lar **Docker Hub**'a push edilip oradan cekiliyor | `docker build` + `docker save \| k3s ctr images import` ile **yerel** olarak containerd'e aktarildi, `imagePullPolicy: Never` | Tek node'da registry'ye ihtiyac yok, hesap/internet bagimliligi azaldi. Docker Hub push akisi `09-cicd-azure-devops.md` planinda otomasyon ile zaten yapilacak |
+| Namespace: `weatherproject` | Namespace: `weather-app` | Onemsiz isimlendirme farki |
+| Frontend: `Service type: NodePort` (`30080`) | Frontend: **Ingress** (Traefik, k3s'e hazir gelir) + `nip.io` ile hostname routing | Ingress, `10-dns-erisim.md`'nin hedefledigi "isimle erisim" konseptini simdiden gosteriyor; NodePort yerine daha production-benzeri yol tercih edildi |
+| `kubectl create secret` komutunda API key literal yaziliyor | API key, VM'deki `.env` dosyasindan `source` ile okunup komut satirina aktarildi | Gercek anahtar hicbir terminal ciktisinda/dosyada gorunmedi |
+| `curl http://192.168.56.11:30080/` ile dogrulama | `curl -H "Host: weather.127.0.0.1.nip.io" http://localhost/` (VM icinden) + tarayicida `http://weather.127.0.0.1.nip.io:8082` (VirtualBox NAT port forward) | Sabit node IP'si yerine NAT + port forwarding + nip.io kombinasyonu kullanildi |
+| RAM/CPU: plan varsayimi (3 kucuk node) | VM sonradan **4GB→8GB RAM, 2→4 CPU**'ya cikarildi | Rancher'in resmi minimum onerisi 4 CPU/8GB — ilk denemede VM asiri yuklenip yanit vermez oldu (bkz. disk de 12GB→23GB LVM ile genisletildi, `DiskPressure` taint'i asmak icin) |
+
+Detayli, satir satir aciklamali kayit: `k8s/` klasorundeki manifestler ve calisma defteri (Claude Code oturumunda uretilen Artifact — link icin sohbet gecmisine bak).

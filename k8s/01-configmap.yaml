@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weather-config
+  namespace: weather-app
+data:
+  POSTGRES_DB: "weatherproject"
+  POSTGRES_USER: "weatherproject"
+  ConnectionStrings__Redis: "redis:6379"
