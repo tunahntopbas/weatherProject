@@ -102,6 +102,9 @@ public class OpenMeteoProvider : IWeatherProvider
 
     private async Task<(double Latitude, double Longitude)> GeocodeAsync(string cityName, CancellationToken cancellationToken)
     {
+        if (TurkishProvinceCoordinates.ByName.TryGetValue(cityName, out var knownCoordinates))
+            return knownCoordinates;
+
         var result = await TryGeocodeAsync(cityName, cancellationToken);
         if (result is not null)
             return result.Value;
