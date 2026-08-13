@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -55,7 +56,7 @@ public class OpenMeteoProvider : IWeatherProvider
         var (latitude, longitude) = await GeocodeAsync(cityName, cancellationToken);
 
         var forecastUri =
-            $"{_options.ForecastBaseUrl}/v1/forecast?latitude={latitude}&longitude={longitude}" +
+            $"{_options.ForecastBaseUrl}/v1/forecast?latitude={latitude.ToString(CultureInfo.InvariantCulture)}&longitude={longitude.ToString(CultureInfo.InvariantCulture)}" +
             "&current=temperature_2m,weather_code,is_day,wind_speed_10m,relative_humidity_2m" +
             "&daily=temperature_2m_max,temperature_2m_min,weather_code" +
             "&forecast_days=7&timezone=auto";
