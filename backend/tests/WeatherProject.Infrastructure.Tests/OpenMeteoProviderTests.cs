@@ -91,8 +91,11 @@ public class OpenMeteoProviderTests
     [Fact]
     public async Task GetCurrentWeatherAsync_WhenFirstGeocodeEmpty_RetriesWithNormalizedTurkishCharacters()
     {
-        // Ilk deneme ("İstanbul", noktali buyuk İ ile) bos donuyor,
-        // ikinci deneme (sadelestirilmis "Istanbul") basariyla eslesiyor.
+        // "İstanbul" 81 il listesinde oldugu icin statik tablodan cozulur ve hic
+        // geocoding cagrisi yapmaz; bu testte, o tabloda olmayan bir sehir ("Münih")
+        // kullanarak ag uzerinden normalize-edilmis-Turkce-karakter tekrar denemesini
+        // dogruluyoruz: ilk deneme ("Münih") bos donuyor, ikinci deneme
+        // (sadelestirilmis "Munih") basariyla eslesiyor.
         var handler = new SequentialFakeHttpMessageHandler(
             (HttpStatusCode.OK, EmptyGeocodingResponseJson),
             (HttpStatusCode.OK, GeocodingResponseJson),
@@ -101,8 +104,25 @@ public class OpenMeteoProviderTests
         var options = Options.Create(new OpenMeteoOptions());
         var provider = new OpenMeteoProvider(httpClient, options);
 
-        var forecast = await provider.GetCurrentWeatherAsync("İstanbul", CancellationToken.None);
+        var forecast = await provider.GetCurrentWeatherAsync("Münih", CancellationToken.None);
 
-        Assert.Equal("İstanbul", forecast.CityName);
+        Assert.Equal("Münih", forecast.CityName);
+    }
+
+    [Fact]
+    public async Task GetCurrentWeatherAsync_WithKnownTurkishProvince_SkipsGeocodingCall()
+    {
+        // Handler hic cagrilmazsa test patlar (queue bos kalir) - bu, statik
+        // tablodan cozulen iller icin ag cagrisi yapilmadigini kanitlar.
+        var handler = new SequentialFakeHttpMessageHandler(
+            (HttpStatusCode.OK, ForecastResponseJson));
+        var httpClient = new HttpClient(handler);
+        var options = Options.Create(new OpenMeteoOptions());
+        var provider = new OpenMeteoProvider(httpClient, options);
+
+        var forecast = await provider.GetCurrentWeatherAsync("Ankara", CancellationToken.None);
+
+        Assert.Equal("Ankara", forecast.CityName);
+        Assert.Equal(24.7, forecast.TemperatureCelsius);
     }
 }
