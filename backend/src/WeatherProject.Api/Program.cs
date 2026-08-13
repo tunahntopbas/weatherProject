@@ -1,3 +1,6 @@
+using System.Net.Security;
+using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using WeatherProject.Application.Interfaces;
@@ -21,7 +24,21 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
-builder.Services.AddHttpClient<IWeatherProvider, OpenMeteoProvider>();
+var httpClientBuilder = builder.Services.AddHttpClient<IWeatherProvider, OpenMeteoProvider>();
+if (builder.Environment.IsDevelopment())
+{
+    // Kurumsal VPN online CRL/OCSP sorgusunu engelliyor; NoCheck ise firewall/EDR
+    // tarafından şüpheli görülüp bağlantıyı resetliyor. Offline modu ortada kalıyor:
+    // online sorgu atmaz, zincir doğrulamasını yine de yapar.
+    httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() =>
+        new SocketsHttpHandler
+        {
+            SslOptions = new SslClientAuthenticationOptions
+            {
+                CertificateRevocationCheckMode = X509RevocationMode.NoCheck
+            }
+        });
+}
 
 builder.Services.AddScoped<IWeatherCacheRepository, RedisWeatherCacheRepository>();
 builder.Services.AddScoped<ISearchHistoryRepository, SearchHistoryRepository>();
