@@ -18,12 +18,12 @@
 .map-page__host {
   max-width: 60rem;
 
-  svg {
+  ::ng-deep svg {
     width: 100%;
     height: auto;
   }
 
-  path {
+  ::ng-deep path {
     fill: rgba(255, 255, 255, 0.18);
     stroke: var(--ink);
     stroke-width: 0.5;
@@ -31,14 +31,15 @@
     transition: fill 200ms ease;
   }
 
-  g[id='north-cyprus'],
-  g[id='south-cyprus'] {
+  ::ng-deep g[id='north-cyprus'],
+  ::ng-deep g[id='south-cyprus'] {
     pointer-events: none;
+  }
 
-    path {
-      fill: rgba(255, 255, 255, 0.06);
-      cursor: default;
-    }
+  ::ng-deep g[id='north-cyprus'] path,
+  ::ng-deep g[id='south-cyprus'] path {
+    fill: rgba(255, 255, 255, 0.06);
+    cursor: default;
   }
 }
 
