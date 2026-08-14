@@ -11,6 +11,7 @@ describe('AnimatedBackgroundComponent', () => {
     skyGradient: 'linear-gradient(180deg, #445566 0%, #6b7d8c 55%, #98a8b3 100%)',
     particle: 'rain',
     headlineTr: 'Yagmurlu',
+    backgroundImageUrl: '/images/weather/rain.jpg',
   };
 
   beforeEach(async () => {
