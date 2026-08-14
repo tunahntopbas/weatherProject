@@ -52,6 +52,19 @@ describe('MapPageComponent', () => {
     expect(fixture.componentInstance.activeTemp()).toBe(24);
   });
 
+  it('shows the temperature and the dashboard-navigation action for an exactly-0°C forecast', () => {
+    const path: SVGElement = fixture.nativeElement.querySelector('path');
+    path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush({ ...mockForecast, temperatureCelsius: 0 });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeTemp()).toBe(0);
+    expect(fixture.nativeElement.textContent).toContain('0°');
+    expect(fixture.nativeElement.querySelector('.map-page__panel-action')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.map-page__panel-loading')).toBeFalsy();
+  });
+
   it('viewOnDashboard() selects the active city and navigates to /', () => {
     const path: SVGElement = fixture.nativeElement.querySelector('path');
     path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
