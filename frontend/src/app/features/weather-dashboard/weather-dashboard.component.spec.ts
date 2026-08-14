@@ -6,6 +6,7 @@ import { WeatherDashboardComponent } from './weather-dashboard.component';
 import { WeatherHeroComponent } from '../../components/weather-hero/weather-hero.component';
 import { ForecastStripComponent } from '../../components/forecast-strip/forecast-strip.component';
 import { AnimatedBackgroundComponent } from '../../components/animated-background/animated-background.component';
+import { SelectedCityService } from '../../core/services/selected-city.service';
 import { environment } from '../../../environments/environment';
 
 describe('WeatherDashboardComponent', () => {
@@ -48,6 +49,20 @@ describe('WeatherDashboardComponent', () => {
     expect(component.forecast()?.cityName).toBe('Ankara');
     expect(component.theme().category).toBe('clear');
     expect(component.errorMessage()).toBeNull();
+  });
+
+  it('loads weather for a city selected via SelectedCityService (top bar search)', async () => {
+    const selectedCityService = TestBed.inject(SelectedCityService);
+    fixture.detectChanges();
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
+    req.flush(mockForecast);
+
+    expect(component.forecast()?.cityName).toBe('Ankara');
   });
 
   it('sets errorMessage() and clears forecast() when the request fails', () => {
