@@ -8,8 +8,8 @@
     <div class="map-page__panel">
       <app-province-badge [cityName]="city" />
       <span class="map-page__panel-city">{{ city }}</span>
-      @if (activeTemp(); as temp) {
-        <span class="map-page__panel-temp">{{ temp | number: '1.0-0' }}°</span>
+      @if (activeTemp() !== null) {
+        <span class="map-page__panel-temp">{{ activeTemp() | number: '1.0-0' }}°</span>
         <button type="button" class="map-page__panel-action" (click)="viewOnDashboard()">Anasayfada gor</button>
       } @else if (!errorMessage()) {
         <span class="map-page__panel-loading">Yukleniyor...</span>

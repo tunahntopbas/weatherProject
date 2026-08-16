@@ -54,6 +54,23 @@ describe('MapPageComponent', () => {
     expect(fixture.componentInstance.activeTemp()).toBe(24);
   });
 
+  it('applies the temperature-derived color-mix fill to the clicked province path via inline style (not setAttribute)', () => {
+    const path: SVGElement = fixture.nativeElement.querySelector('path');
+    path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    // The fix uses path.style.fill = color (real CSS, resolves var()/color-mix()) instead of
+    // path.setAttribute('fill', color) (an SVG presentation attribute, which does not resolve
+    // var()/color-mix() in current browsers). Assert the style property itself was populated
+    // with the expected color-mix(...) expression, and that the presentation attribute was NOT
+    // used for this purpose.
+    expect(path.style.fill).toContain('color-mix(in srgb, var(--cold)');
+    expect(path.style.fill).toContain('var(--warm)');
+    expect(path.getAttribute('fill')).toBeNull();
+  });
+
   it('viewOnDashboard() selects the active city and navigates to /', () => {
     const path: SVGElement = fixture.nativeElement.querySelector('path');
     path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -68,6 +85,32 @@ describe('MapPageComponent', () => {
 
     expect(selectedCityService.cityName()).toBe('Ankara');
     expect(navigateSpy).toHaveBeenCalledWith(['/']);
+  });
+
+  it('shows the loading state while the request is in flight, before any response arrives', () => {
+    const path: SVGElement = fixture.nativeElement.querySelector('path');
+    path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Yukleniyor...');
+
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+  });
+
+  it('renders the temperature and "Anasayfada gor" button for a province at exactly 0 degrees (falsy-but-not-null regression)', () => {
+    const path: SVGElement = fixture.nativeElement.querySelector('path');
+    path.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush({ ...mockForecast, temperatureCelsius: 0 });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeTemp()).toBe(0);
+
+    const panel = fixture.nativeElement as HTMLElement;
+    expect(panel.textContent).not.toContain('Yukleniyor...');
+    expect(panel.querySelector('.map-page__panel-action')).toBeTruthy();
+    expect(panel.querySelector('.map-page__panel-temp')?.textContent).toContain('0');
   });
 
   it('ignores a stale response when a second province is clicked before the first one responds', () => {

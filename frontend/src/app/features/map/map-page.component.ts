@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewEncapsulation, inject, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -14,6 +14,13 @@ const NON_PROVINCE_NAMES = new Set(['North Cyprus', 'South Cyprus']);
   imports: [DecimalPipe, ProvinceBadgeComponent],
   templateUrl: './map-page.component.html',
   styleUrl: './map-page.component.scss',
+  // This component's styles exist ONLY to style SVG content injected via [innerHTML]. Angular's
+  // emulated encapsulation scopes the host-side selector too (e.g. `.map-page__host path`
+  // compiles to `.map-page__host[_ngcontent-xxx] path[_ngcontent-xxx]`), and innerHTML-injected
+  // nodes never receive the `_ngcontent-*` attribute, so scoped selectors never match. Disabling
+  // encapsulation is safe here because every rule below is already narrowly scoped by the
+  // `.map-page__*` class names.
+  encapsulation: ViewEncapsulation.None,
 })
 export class MapPageComponent implements AfterViewInit {
   private readonly http = inject(HttpClient);
@@ -79,6 +86,11 @@ export class MapPageComponent implements AfterViewInit {
   private colorProvince(groupEl: Element, tempCelsius: number): void {
     const ratio = Math.min(Math.max((tempCelsius + 10) / 40, 0), 1);
     const color = `color-mix(in srgb, var(--cold) ${(1 - ratio) * 100}%, var(--warm) ${ratio * 100}%)`;
-    groupEl.querySelectorAll('path').forEach((path) => path.setAttribute('fill', color));
+    // `var()`/`color-mix()` only resolve through real CSS (an inline `style` property or a
+    // stylesheet rule) — setAttribute('fill', ...) on an SVG presentation attribute does not
+    // evaluate custom properties or modern color functions in current browsers.
+    groupEl.querySelectorAll<SVGElement>('path').forEach((path) => {
+      path.style.fill = color;
+    });
   }
 }
