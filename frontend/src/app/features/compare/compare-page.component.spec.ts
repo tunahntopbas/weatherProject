@@ -71,4 +71,47 @@ describe('ComparePageComponent', () => {
 
     expect(component.slots().length).toBe(0);
   });
+
+  it('addCity() called twice with the same city only creates one slot and fires one HTTP request', () => {
+    component.addCity('Ankara');
+    component.addCity('Ankara');
+
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(forecastFor('Ankara'));
+
+    expect(component.slots().length).toBe(1);
+  });
+
+  // --- Rendered-template coverage (added on review: no test previously called detectChanges()) ---
+
+  it('renders the added city name in the DOM and hides the autocomplete once 3 slots are filled', () => {
+    fixture.detectChanges();
+
+    component.addCity('Ankara');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(forecastFor('Ankara'));
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Ankara');
+    expect(fixture.nativeElement.querySelector('app-city-autocomplete')).toBeTruthy();
+
+    component.addCity('İzmir');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/%C4%B0zmir`).flush(forecastFor('İzmir'));
+    fixture.detectChanges();
+
+    component.addCity('Bursa');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Bursa`).flush(forecastFor('Bursa'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.compare-card').length).toBe(3);
+    expect(fixture.nativeElement.querySelector('app-city-autocomplete')).toBeFalsy();
+  });
+
+  it('renders the failed state in the DOM when a request errors', () => {
+    fixture.detectChanges();
+
+    component.addCity('Ankara');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush('err', { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Yuklenemedi');
+  });
 });
