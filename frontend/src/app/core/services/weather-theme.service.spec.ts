@@ -1,4 +1,4 @@
-import { resolveWeatherTheme } from './weather-theme.service';
+import { resolveWeatherTheme, weatherCategoryFromCode, WEATHER_CATEGORY_ICON } from './weather-theme.service';
 
 describe('resolveWeatherTheme', () => {
   it('maps clear-sky code (0) with isDay true to clear/day/sun-rays', () => {
@@ -44,5 +44,37 @@ describe('resolveWeatherTheme', () => {
     const day = resolveWeatherTheme(2, true);
     const night = resolveWeatherTheme(2, false);
     expect(day.skyGradient).not.toBe(night.skyGradient);
+  });
+
+  it('includes a backgroundImageUrl derived from the category', () => {
+    expect(resolveWeatherTheme(0, true).backgroundImageUrl).toBe('/images/weather/clear.jpg');
+    expect(resolveWeatherTheme(95, true).backgroundImageUrl).toBe('/images/weather/storm.jpg');
+  });
+
+  it('drizzle and cloudy share the same background photo', () => {
+    expect(resolveWeatherTheme(51, true).backgroundImageUrl).toBe(
+      resolveWeatherTheme(2, true).backgroundImageUrl,
+    );
+  });
+});
+
+describe('weatherCategoryFromCode', () => {
+  it('maps a known code to its category', () => {
+    expect(weatherCategoryFromCode(71)).toBe('snow');
+  });
+
+  it('falls back to cloudy for an unrecognized code', () => {
+    expect(weatherCategoryFromCode(999)).toBe('cloudy');
+  });
+});
+
+describe('WEATHER_CATEGORY_ICON', () => {
+  it('has an icon entry for every category', () => {
+    const categories: (keyof typeof WEATHER_CATEGORY_ICON)[] = [
+      'clear', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'storm',
+    ];
+    for (const category of categories) {
+      expect(WEATHER_CATEGORY_ICON[category]).toBeTruthy();
+    }
   });
 });
