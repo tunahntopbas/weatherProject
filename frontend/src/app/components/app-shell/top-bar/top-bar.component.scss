@@ -1,3 +1,47 @@
 .top-bar {
-  padding: 1.5rem 1.5rem 0 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.75rem 2rem 1.25rem;
+  border-bottom: 1px dashed var(--hairline-dash);
+}
+
+.top-bar__mast {
+  min-width: 0;
+}
+
+.top-bar__wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.625rem;
+  color: var(--paper);
+  letter-spacing: 0.01em;
+}
+
+.top-bar__date {
+  margin: 0.125rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-on-glass-muted);
+}
+
+.top-bar__search {
+  width: 100%;
+  max-width: 22rem;
+}
+
+@media (max-width: 640px) {
+  .top-bar {
+    padding: 1.25rem 1.25rem 1rem;
+  }
+
+  .top-bar__search {
+    max-width: none;
+  }
 }

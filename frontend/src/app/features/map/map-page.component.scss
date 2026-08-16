@@ -1,22 +1,23 @@
 .map-page {
-  padding: 1.5rem 1.5rem 3rem 1.5rem;
-  color: var(--paper);
   position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem 2rem 3rem;
+  color: var(--paper);
 }
 
-.map-page__title {
-  font-family: var(--font-display);
-  font-weight: 600;
-}
-
-.map-page__hint {
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  color: var(--color-on-glass-muted);
+.map-page__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
 }
 
 .map-page__host {
-  max-width: 60rem;
+  flex: 1 1 32rem;
+  min-width: 0;
+  max-width: 52rem;
 }
 
 .map-page__host svg {
@@ -44,24 +45,48 @@
 }
 
 .map-page__panel {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 1rem 1.25rem;
+  flex: 0 0 16rem;
+  padding: 1.5rem;
   border: 1px solid var(--glass-border);
-  border-radius: 1rem;
+  border-radius: var(--panel-radius);
   background: var(--color-glass-bg);
   backdrop-filter: blur(14px);
-  width: fit-content;
+}
+
+.map-page__panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.map-page__panel-city {
+  font-weight: 600;
+}
+
+.map-page__panel-stub {
+  margin: 1rem 0 0.875rem;
+  height: 0;
+  border-top: 1px dashed var(--hairline-dash);
 }
 
 .map-page__panel-temp {
+  display: block;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+.map-page__panel-loading {
+  display: block;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-on-glass-muted);
 }
 
 .map-page__panel-action {
+  display: inline-block;
+  margin-top: 1rem;
   border: 1px solid var(--stamp);
   background: none;
   color: var(--stamp);
@@ -72,6 +97,13 @@
 }
 
 .map-page__error {
+  margin-top: 1rem;
   color: var(--warm);
   font-family: var(--font-mono);
+}
+
+@media (max-width: 40rem) {
+  .map-page {
+    padding: 1.5rem 1.5rem 2.5rem;
+  }
 }

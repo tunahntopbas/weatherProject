@@ -1,3 +1,9 @@
 <header class="top-bar">
-  <app-city-autocomplete (citySelected)="onCitySelected($event)" />
+  <div class="top-bar__mast">
+    <p class="top-bar__wordmark">Hava Defteri</p>
+    <p class="top-bar__date">{{ today }}</p>
+  </div>
+  <div class="top-bar__search">
+    <app-city-autocomplete (citySelected)="onCitySelected($event)" />
+  </div>
 </header>

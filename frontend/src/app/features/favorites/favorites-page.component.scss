@@ -1,11 +1,10 @@
 .favorites-page {
-  padding: 1.5rem 1.5rem 3rem 1.5rem;
+  position: relative;
+  z-index: 1;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 2rem 3rem;
   color: var(--paper);
-}
-
-.favorites-page__title {
-  font-family: var(--font-display);
-  font-weight: 600;
 }
 
 .favorites-page__hint {
@@ -17,5 +16,11 @@
 .favorites-page__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: 0.75rem;
+  gap: 0.875rem;
+}
+
+@media (max-width: 40rem) {
+  .favorites-page {
+    padding: 1.5rem 1.5rem 2.5rem;
+  }
 }

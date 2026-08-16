@@ -1,4 +1,5 @@
 <div class="hero">
+  <p class="hero__eyebrow">Anlik Durum</p>
   <div class="hero__city-row">
     <p class="hero__city">{{ forecast().cityName }}</p>
     <app-province-badge [cityName]="forecast().cityName" />
@@ -12,6 +13,7 @@
   </div>
   <p class="hero__temp">{{ forecast().temperatureCelsius | number: '1.0-0' }}°</p>
   <h1 class="hero__headline">{{ theme().headlineTr }}</h1>
+  <div class="hero__stub" aria-hidden="true"></div>
   <div class="hero__stats">
     <span class="hero__stat">
       <span class="hero__stat-label">Ruzgar</span>

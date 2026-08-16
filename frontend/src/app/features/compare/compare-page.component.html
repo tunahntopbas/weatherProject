@@ -1,8 +1,14 @@
 <div class="compare-page">
-  <h1 class="compare-page__title">Karsilastir</h1>
+  <header class="page-masthead">
+    <p class="page-masthead__eyebrow">Yan Yana</p>
+    <h1 class="compare-page__title">Karsilastir</h1>
+    <p class="page-masthead__hint">En fazla 3 il ekleyip anlik durumlarini karsilastirin.</p>
+  </header>
 
   @if (slots().length < 3) {
-    <app-city-autocomplete (citySelected)="addCity($event)" />
+    <div class="compare-page__search">
+      <app-city-autocomplete (citySelected)="addCity($event)" />
+    </div>
   }
 
   <div class="compare-page__grid">
@@ -18,6 +24,7 @@
           <p class="compare-card__failed">Yuklenemedi</p>
         } @else if (slot.forecast; as forecast) {
           <p class="compare-card__temp">{{ forecast.temperatureCelsius | number: '1.0-0' }}°</p>
+          <div class="compare-card__stub" aria-hidden="true"></div>
           <div class="compare-card__stats">
             <span>Ruzgar: {{ forecast.windSpeedKmh | number: '1.0-0' }} km/s</span>
             <span>Nem: %{{ forecast.humidityPercent | number: '1.0-0' }}</span>

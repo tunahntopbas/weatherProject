@@ -1,8 +1,18 @@
 .strip {
   background: var(--color-glass-bg);
   backdrop-filter: blur(18px);
-  border-radius: 1.25rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--panel-radius);
   padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.strip__eyebrow {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-on-glass-muted);
 }
 
 .strip__line {

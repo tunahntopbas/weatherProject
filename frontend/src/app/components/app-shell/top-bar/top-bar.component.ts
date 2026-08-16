@@ -13,6 +13,12 @@ export class TopBarComponent {
   private readonly selectedCityService = inject(SelectedCityService);
   private readonly router = inject(Router);
 
+  readonly today = new Intl.DateTimeFormat('tr-TR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date());
+
   onCitySelected(cityName: string): void {
     this.selectedCityService.select(cityName);
     // The dashboard is the only page that reacts to SelectedCityService; without navigating,

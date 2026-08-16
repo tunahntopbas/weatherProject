@@ -1,13 +1,27 @@
 <nav class="sidebar" aria-label="Ana navigasyon">
-  <span class="sidebar__logo">HD</span>
+  <span class="sidebar__brand" aria-hidden="true">HD</span>
   <a
     class="sidebar__link"
     routerLink="/"
     routerLinkActive="sidebar__link--active"
     [routerLinkActiveOptions]="{ exact: true }"
     aria-label="Anasayfa"
-  >🏠</a>
-  <a class="sidebar__link" routerLink="/favoriler" routerLinkActive="sidebar__link--active" aria-label="Favoriler">♥</a>
-  <a class="sidebar__link" routerLink="/karsilastir" routerLinkActive="sidebar__link--active" aria-label="Karsilastir">⇄</a>
-  <a class="sidebar__link" routerLink="/harita" routerLinkActive="sidebar__link--active" aria-label="Harita">▦</a>
+  >
+    <span class="sidebar__icon">🏠</span>
+    <span class="sidebar__label">Anasayfa</span>
+  </a>
+  <a class="sidebar__link" routerLink="/favoriler" routerLinkActive="sidebar__link--active" aria-label="Favoriler">
+    <span class="sidebar__icon">♥</span>
+    <span class="sidebar__label">Favoriler</span>
+  </a>
+  <a class="sidebar__link" routerLink="/karsilastir" routerLinkActive="sidebar__link--active" aria-label="Karsilastir">
+    <span class="sidebar__icon">⇄</span>
+    <span class="sidebar__label">Karsilastir</span>
+  </a>
+  <a class="sidebar__link" routerLink="/harita" routerLinkActive="sidebar__link--active" aria-label="Harita">
+    <span class="sidebar__icon">▦</span>
+    <span class="sidebar__label">Harita</span>
+  </a>
+  <span class="sidebar__spacer"></span>
+  <span class="sidebar__plate" aria-hidden="true">TR</span>
 </nav>

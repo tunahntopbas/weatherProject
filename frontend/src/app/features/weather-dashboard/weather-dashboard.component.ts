@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { WeatherService } from '../../core/services/weather.service';
 import { WeatherForecast } from '../../core/models/weather-forecast.model';
 import { resolveWeatherTheme } from '../../core/services/weather-theme.service';
@@ -14,7 +15,7 @@ const MAX_RECENT_CITIES = 5;
 
 @Component({
   selector: 'app-weather-dashboard',
-  imports: [WeatherHeroComponent, ForecastStripComponent, CityWeatherCardComponent],
+  imports: [NgTemplateOutlet, WeatherHeroComponent, ForecastStripComponent, CityWeatherCardComponent],
   templateUrl: './weather-dashboard.component.html',
   styleUrl: './weather-dashboard.component.scss',
 })
