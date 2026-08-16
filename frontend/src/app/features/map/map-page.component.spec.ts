@@ -13,6 +13,7 @@ describe('MapPageComponent', () => {
 
   const sampleSvg = `<svg id="map-svg" viewBox="0 0 10 10">
     <g><g id="ankara" data-plate-code="06" data-name="Ankara"><path d="M0,0 L1,1"/></g></g>
+    <g><g id="izmir" data-plate-code="35" data-name="İzmir"><path d="M2,2 L3,3"/></g></g>
   </svg>`;
 
   const mockForecast = {
@@ -67,5 +68,27 @@ describe('MapPageComponent', () => {
 
     expect(selectedCityService.cityName()).toBe('Ankara');
     expect(navigateSpy).toHaveBeenCalledWith(['/']);
+  });
+
+  it('ignores a stale response when a second province is clicked before the first one responds', () => {
+    const paths: NodeListOf<SVGElement> = fixture.nativeElement.querySelectorAll('path');
+    const ankaraPath = paths[0];
+    const izmirPath = paths[1];
+
+    ankaraPath.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    izmirPath.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    const izmirForecast = { ...mockForecast, cityName: 'İzmir', temperatureCelsius: 30 };
+
+    // The second click's request resolves first...
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/${encodeURIComponent('İzmir')}`).flush(izmirForecast);
+    fixture.detectChanges();
+
+    // ...then the first click's now-stale request resolves after.
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeCity()).toBe('İzmir');
+    expect(fixture.componentInstance.activeTemp()).toBe(30);
   });
 });

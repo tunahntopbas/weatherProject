@@ -65,10 +65,14 @@ export class MapPageComponent implements AfterViewInit {
 
     this.weatherService.getCurrentWeather(cityName).subscribe({
       next: (forecast) => {
+        if (this.activeCity() !== cityName) return; // stale response, a newer click superseded this one
         this.activeTemp.set(forecast.temperatureCelsius);
         this.colorProvince(groupEl, forecast.temperatureCelsius);
       },
-      error: () => this.errorMessage.set(`${cityName} icin veri alinamadi.`),
+      error: () => {
+        if (this.activeCity() !== cityName) return;
+        this.errorMessage.set(`${cityName} icin veri alinamadi.`);
+      },
     });
   }
 
