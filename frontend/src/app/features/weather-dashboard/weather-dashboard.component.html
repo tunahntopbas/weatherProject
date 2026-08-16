@@ -1,10 +1,10 @@
 <app-animated-background [theme]="theme()" />
 
 <main class="dashboard">
-  @if (recentCities().length > 0) {
+  @if (recentSummaries().length > 0) {
     <div class="dashboard__recent">
-      @for (city of recentCities(); track city) {
-        <button type="button" class="dashboard__recent-chip" (click)="onCitySelected(city)">{{ city }}</button>
+      @for (summary of recentSummaries(); track summary.cityName) {
+        <app-city-weather-card [summary]="summary" (select)="onCardSelected($event)" />
       }
     </div>
   }
