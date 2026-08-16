@@ -1,8 +1,6 @@
 <app-animated-background [theme]="theme()" />
 
 <main class="dashboard">
-  <app-city-autocomplete (citySelected)="onCitySelected($event)" />
-
   @if (recentCities().length > 0) {
     <div class="dashboard__recent">
       @for (city of recentCities(); track city) {

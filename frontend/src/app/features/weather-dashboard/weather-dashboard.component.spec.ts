@@ -7,6 +7,7 @@ import { WeatherHeroComponent } from '../../components/weather-hero/weather-hero
 import { ForecastStripComponent } from '../../components/forecast-strip/forecast-strip.component';
 import { AnimatedBackgroundComponent } from '../../components/animated-background/animated-background.component';
 import { environment } from '../../../environments/environment';
+import { SelectedCityService } from '../../core/services/selected-city.service';
 
 describe('WeatherDashboardComponent', () => {
   let fixture: ComponentFixture<WeatherDashboardComponent>;
@@ -78,6 +79,20 @@ describe('WeatherDashboardComponent', () => {
     httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
 
     expect(component.recentCities()).toEqual(['Ankara']);
+  });
+
+  it('loads weather for a city selected via SelectedCityService (top bar search)', async () => {
+    const selectedCityService = TestBed.inject(SelectedCityService);
+    fixture.detectChanges();
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
+    req.flush(mockForecast);
+
+    expect(component.forecast()?.cityName).toBe('Ankara');
   });
 
   // --- Supplementary DOM/localStorage-level coverage (added on review) ---
