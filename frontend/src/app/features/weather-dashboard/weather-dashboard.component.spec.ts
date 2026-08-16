@@ -5,8 +5,9 @@ import { By } from '@angular/platform-browser';
 import { WeatherDashboardComponent } from './weather-dashboard.component';
 import { WeatherHeroComponent } from '../../components/weather-hero/weather-hero.component';
 import { ForecastStripComponent } from '../../components/forecast-strip/forecast-strip.component';
-import { AnimatedBackgroundComponent } from '../../components/animated-background/animated-background.component';
 import { environment } from '../../../environments/environment';
+import { SelectedCityService } from '../../core/services/selected-city.service';
+import { WeatherThemeStateService } from '../../core/services/weather-theme-state.service';
 
 describe('WeatherDashboardComponent', () => {
   let fixture: ComponentFixture<WeatherDashboardComponent>;
@@ -80,22 +81,62 @@ describe('WeatherDashboardComponent', () => {
     expect(component.recentCities()).toEqual(['Ankara']);
   });
 
+  it('loads weather for a city selected via SelectedCityService (top bar search)', async () => {
+    const selectedCityService = TestBed.inject(SelectedCityService);
+    fixture.detectChanges();
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
+    req.flush(mockForecast);
+
+    expect(component.forecast()?.cityName).toBe('Ankara');
+  });
+
+  it('refetches when the same city is selected again via SelectedCityService (repeat top-bar search is not a silent no-op)', async () => {
+    const selectedCityService = TestBed.inject(SelectedCityService);
+    fixture.detectChanges();
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+
+    // recentCities effect triggers a MultiCityWeatherService fetch for the 1 recent city
+    await fixture.whenStable();
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const secondReq = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
+    secondReq.flush(mockForecast);
+
+    expect(component.forecast()?.cityName).toBe('Ankara');
+  });
+
   // --- Supplementary DOM/localStorage-level coverage (added on review) ---
 
-  it('renders app-weather-hero, app-forecast-strip, and app-animated-background with correctly bound inputs after a successful search (DOM)', () => {
+  it('renders app-weather-hero and app-forecast-strip with correctly bound inputs after a successful search (DOM)', () => {
     fixture.detectChanges();
 
     component.onCitySelected('Ankara');
     httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
     fixture.detectChanges();
 
+    // recentCities effect triggers a MultiCityWeatherService fetch for the 1 recent city
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
     const heroDebug = fixture.debugElement.query(By.directive(WeatherHeroComponent));
     const stripDebug = fixture.debugElement.query(By.directive(ForecastStripComponent));
-    const bgDebug = fixture.debugElement.query(By.directive(AnimatedBackgroundComponent));
 
     expect(heroDebug).toBeTruthy();
     expect(stripDebug).toBeTruthy();
-    expect(bgDebug).toBeTruthy();
 
     const hero = heroDebug.componentInstance as WeatherHeroComponent;
     expect(hero.forecast().cityName).toBe('Ankara');
@@ -103,30 +144,21 @@ describe('WeatherDashboardComponent', () => {
 
     const strip = stripDebug.componentInstance as ForecastStripComponent;
     expect(strip.days()).toEqual(mockForecast.daily);
-
-    const bg = bgDebug.componentInstance as AnimatedBackgroundComponent;
-    expect(bg.theme().category).toBe('clear');
   });
 
-  it('renders recent-city chips and re-triggers a real HTTP search when a chip is clicked (DOM)', () => {
-    component.onCitySelected('Ankara');
-    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
-
-    component.onCitySelected('İzmir');
-    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/%C4%B0zmir`).flush({ ...mockForecast, cityName: 'İzmir' });
+  it('pushes the derived theme into WeatherThemeStateService so the shell-level background reflects it', () => {
+    const weatherThemeStateService = TestBed.inject(WeatherThemeStateService);
     fixture.detectChanges();
 
-    const chips: HTMLButtonElement[] = Array.from(
-      fixture.nativeElement.querySelectorAll('.dashboard__recent-chip'),
-    );
-    expect(chips.map((chip) => chip.textContent?.trim())).toEqual(['İzmir', 'Ankara']);
+    component.onCitySelected('Ankara');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
 
-    const ankaraChip = chips.find((chip) => chip.textContent?.trim() === 'Ankara')!;
-    ankaraChip.click();
+    // recentCities effect triggers a MultiCityWeatherService fetch for the 1 recent city
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockForecast);
+    expect(weatherThemeStateService.theme().category).toBe('clear');
   });
 
   it('renders a role="alert" element with the error text in the DOM when the request fails', () => {
@@ -142,18 +174,27 @@ describe('WeatherDashboardComponent', () => {
     expect(alertEl?.textContent).toContain('Hava durumu alinamadi');
   });
 
-  it('caps recentCities() at MAX_RECENT_CITIES (5), reflected in the rendered chip DOM', () => {
+  it('fetches and renders a live city-weather-card for each recent city (DOM)', () => {
+    component.onCitySelected('Ankara');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    // recentCities effect triggers a MultiCityWeatherService fetch for the 1 recent city
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    const cards = fixture.nativeElement.querySelectorAll('app-city-weather-card');
+    expect(cards.length).toBe(1);
+  });
+
+  it('caps recentCities() at MAX_RECENT_CITIES (5)', () => {
     const cities = ['City1', 'City2', 'City3', 'City4', 'City5', 'City6'];
     for (const city of cities) {
       component.onCitySelected(city);
       httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/${city}`).flush({ ...mockForecast, cityName: city });
     }
-    fixture.detectChanges();
 
     expect(component.recentCities()).toEqual(['City6', 'City5', 'City4', 'City3', 'City2']);
-
-    const chips = fixture.nativeElement.querySelectorAll('.dashboard__recent-chip');
-    expect(chips.length).toBe(5);
   });
 
   it('persists recentCities() to real localStorage and a fresh component instance loads it back on init (reload survival)', () => {

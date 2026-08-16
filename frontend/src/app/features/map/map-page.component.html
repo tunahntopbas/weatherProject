@@ -1,0 +1,23 @@
+<div class="map-page">
+  <h1 class="map-page__title">Harita</h1>
+  <p class="map-page__hint">Bir ile tiklayin.</p>
+
+  <div class="map-page__host" #mapHost [innerHTML]="svgMarkup()"></div>
+
+  @if (activeCity(); as city) {
+    <div class="map-page__panel">
+      <app-province-badge [cityName]="city" />
+      <span class="map-page__panel-city">{{ city }}</span>
+      @if (activeTemp() !== null) {
+        <span class="map-page__panel-temp">{{ activeTemp() | number: '1.0-0' }}°</span>
+        <button type="button" class="map-page__panel-action" (click)="viewOnDashboard()">Anasayfada gor</button>
+      } @else if (!errorMessage()) {
+        <span class="map-page__panel-loading">Yukleniyor...</span>
+      }
+    </div>
+  }
+
+  @if (errorMessage(); as msg) {
+    <p class="map-page__error" role="alert">{{ msg }}</p>
+  }
+</div>

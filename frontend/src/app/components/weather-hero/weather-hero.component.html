@@ -1,5 +1,15 @@
 <div class="hero">
-  <p class="hero__city">{{ forecast().cityName }}</p>
+  <div class="hero__city-row">
+    <p class="hero__city">{{ forecast().cityName }}</p>
+    <app-province-badge [cityName]="forecast().cityName" />
+    <button
+      type="button"
+      class="hero__favorite"
+      [attr.aria-pressed]="isFavorite()"
+      [attr.aria-label]="isFavorite() ? 'Favorilerden cikar' : 'Favorilere ekle'"
+      (click)="toggleFavorite()"
+    >{{ isFavorite() ? '♥' : '♡' }}</button>
+  </div>
   <p class="hero__temp">{{ forecast().temperatureCelsius | number: '1.0-0' }}°</p>
   <h1 class="hero__headline">{{ theme().headlineTr }}</h1>
   <div class="hero__stats">

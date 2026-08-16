@@ -1,0 +1,48 @@
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(18px);
+  border-right: 1px solid var(--glass-border);
+  z-index: 2;
+}
+
+.sidebar__logo {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--paper);
+  letter-spacing: 0.08em;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: var(--color-on-glass-muted);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    background: var(--stamp);
+    color: var(--paper);
+  }
+}

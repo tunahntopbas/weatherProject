@@ -1,0 +1,10 @@
+<button type="button" class="city-card" (click)="onClick()">
+  <app-province-badge [cityName]="summary().cityName" />
+  <span class="city-card__name">{{ summary().cityName }}</span>
+  @if (summary().failed) {
+    <span class="city-card__failed">Yuklenemedi</span>
+  } @else {
+    <span class="city-card__icon">{{ icon() }}</span>
+    <span class="city-card__temp">{{ summary().temperatureCelsius | number: '1.0-0' }}°</span>
+  }
+</button>

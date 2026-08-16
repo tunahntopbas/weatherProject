@@ -9,5 +9,6 @@ import { WeatherTheme } from '../../core/services/weather-theme.service';
 export class AnimatedBackgroundComponent {
   readonly theme = input.required<WeatherTheme>();
 
-  readonly skyStyle = computed(() => ({ background: this.theme().skyGradient }));
+  readonly photoStyle = computed(() => ({ 'background-image': `url(${this.theme().backgroundImageUrl})` }));
+  readonly scrimStyle = computed(() => ({ background: this.theme().skyGradient }));
 }

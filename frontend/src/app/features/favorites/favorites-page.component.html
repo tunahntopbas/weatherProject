@@ -1,0 +1,12 @@
+<div class="favorites-page">
+  <h1 class="favorites-page__title">Favoriler</h1>
+  @if (summaries().length === 0) {
+    <p class="favorites-page__hint">Henuz favori sehir eklenmedi, bir sehri arayip kalp ikonuna tiklayin.</p>
+  } @else {
+    <div class="favorites-page__grid">
+      @for (summary of summaries(); track summary.cityName) {
+        <app-city-weather-card [summary]="summary" (select)="onCardSelected($event)" />
+      }
+    </div>
+  }
+</div>

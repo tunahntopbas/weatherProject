@@ -1,0 +1,46 @@
+.city-card {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(12px);
+  color: var(--paper);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+}
+
+.city-card__name {
+  flex: 1;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.city-card__icon {
+  font-size: 1rem;
+}
+
+.city-card__temp {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.city-card__failed {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--warm);
+}

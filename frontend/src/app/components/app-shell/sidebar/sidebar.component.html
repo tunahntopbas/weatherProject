@@ -1,0 +1,13 @@
+<nav class="sidebar" aria-label="Ana navigasyon">
+  <span class="sidebar__logo">HD</span>
+  <a
+    class="sidebar__link"
+    routerLink="/"
+    routerLinkActive="sidebar__link--active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    aria-label="Anasayfa"
+  >🏠</a>
+  <a class="sidebar__link" routerLink="/favoriler" routerLinkActive="sidebar__link--active" aria-label="Favoriler">♥</a>
+  <a class="sidebar__link" routerLink="/karsilastir" routerLinkActive="sidebar__link--active" aria-label="Karsilastir">⇄</a>
+  <a class="sidebar__link" routerLink="/harita" routerLinkActive="sidebar__link--active" aria-label="Harita">▦</a>
+</nav>
