@@ -1,0 +1,48 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - frontend/*
+
+pr: none
+
+pool:
+  name: Default
+
+jobs:
+  - job: build_test_deploy
+    displayName: Build, Test, Deploy Frontend
+    steps:
+      - checkout: self
+
+      - script: npm ci
+        workingDirectory: frontend
+        displayName: npm ci
+
+      - script: npm test
+        workingDirectory: frontend
+        displayName: npm test
+        timeoutInMinutes: 5
+        env:
+          CI: "true"
+
+      - script: npm run build
+        workingDirectory: frontend
+        displayName: npm run build
+
+      - script: docker build -t weatherproject-frontend:latest ./frontend
+        displayName: Build Docker image
+
+      - script: |
+          docker tag weatherproject-frontend:latest weather-frontend:local
+          docker save weather-frontend:local | sudo k3s ctr images import -
+        displayName: Import image into k3s containerd
+
+      - script: |
+          kubectl rollout restart deployment frontend -n weather-app
+          kubectl rollout status deployment frontend -n weather-app --timeout=120s
+        displayName: Deploy to Kubernetes
+        env:
+          KUBECONFIG: /home/tunahntopbas/.kube/config

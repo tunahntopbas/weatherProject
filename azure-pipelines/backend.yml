@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - backend/*
+
+pr: none
+
+pool:
+  name: Default
+
+jobs:
+  - job: build_test_deploy
+    displayName: Build, Test, Deploy Backend
+    steps:
+      - checkout: self
+
+      - script: dotnet restore backend/WeatherProject.sln
+        displayName: Restore
+
+      - script: dotnet build backend/WeatherProject.sln --configuration Release --no-restore
+        displayName: Build
+
+      - script: dotnet test backend/WeatherProject.sln --configuration Release --no-build
+        displayName: Test
+
+      # WEBSENSE_ROOT_CA: Pipeline > Edit > Variables altinda "secret" olarak eklenmeli.
+      # Secret degerler YAML'a yazilamaz, sadece env eslemesiyle script'e aktarilir.
+      - script: printf '%s' "$WEBSENSE_ROOT_CA" > backend/websense-root-ca.crt
+        displayName: Write corporate root CA (not committed to repo)
+        env:
+          WEBSENSE_ROOT_CA: $(WEBSENSE_ROOT_CA)
+
+      - script: docker build -t weatherproject-backend:latest ./backend
+        displayName: Build Docker image
+
+      - script: |
+          docker tag weatherproject-backend:latest weather-backend:local
+          docker save weather-backend:local | sudo k3s ctr images import -
+        displayName: Import image into k3s containerd
+
+      - script: |
+          kubectl rollout restart deployment backend -n weather-app
+          kubectl rollout status deployment backend -n weather-app --timeout=120s
+        displayName: Deploy to Kubernetes
+        env:
+          KUBECONFIG: /home/tunahntopbas/.kube/config
