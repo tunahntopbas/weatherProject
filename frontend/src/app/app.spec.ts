@@ -18,12 +18,13 @@ describe('App', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('renders the sidebar and top bar chrome', () => {
+  it('renders the sidebar, top bar chrome, and animated background', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-sidebar')).toBeTruthy();
     expect(compiled.querySelector('app-top-bar')).toBeTruthy();
+    expect(compiled.querySelector('app-animated-background')).toBeTruthy();
   });
 
   it('renders the weather dashboard at the root route', async () => {
@@ -33,5 +34,18 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-weather-dashboard')).toBeTruthy();
+  });
+
+  it('keeps a single app-animated-background instance mounted when navigating to a non-root route', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
+    fixture.detectChanges();
+
+    await router.navigateByUrl('/favoriler');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('app-animated-background').length).toBe(1);
   });
 });

@@ -5,9 +5,9 @@ import { By } from '@angular/platform-browser';
 import { WeatherDashboardComponent } from './weather-dashboard.component';
 import { WeatherHeroComponent } from '../../components/weather-hero/weather-hero.component';
 import { ForecastStripComponent } from '../../components/forecast-strip/forecast-strip.component';
-import { AnimatedBackgroundComponent } from '../../components/animated-background/animated-background.component';
 import { environment } from '../../../environments/environment';
 import { SelectedCityService } from '../../core/services/selected-city.service';
+import { WeatherThemeStateService } from '../../core/services/weather-theme-state.service';
 
 describe('WeatherDashboardComponent', () => {
   let fixture: ComponentFixture<WeatherDashboardComponent>;
@@ -121,7 +121,7 @@ describe('WeatherDashboardComponent', () => {
 
   // --- Supplementary DOM/localStorage-level coverage (added on review) ---
 
-  it('renders app-weather-hero, app-forecast-strip, and app-animated-background with correctly bound inputs after a successful search (DOM)', () => {
+  it('renders app-weather-hero and app-forecast-strip with correctly bound inputs after a successful search (DOM)', () => {
     fixture.detectChanges();
 
     component.onCitySelected('Ankara');
@@ -134,11 +134,9 @@ describe('WeatherDashboardComponent', () => {
 
     const heroDebug = fixture.debugElement.query(By.directive(WeatherHeroComponent));
     const stripDebug = fixture.debugElement.query(By.directive(ForecastStripComponent));
-    const bgDebug = fixture.debugElement.query(By.directive(AnimatedBackgroundComponent));
 
     expect(heroDebug).toBeTruthy();
     expect(stripDebug).toBeTruthy();
-    expect(bgDebug).toBeTruthy();
 
     const hero = heroDebug.componentInstance as WeatherHeroComponent;
     expect(hero.forecast().cityName).toBe('Ankara');
@@ -146,9 +144,21 @@ describe('WeatherDashboardComponent', () => {
 
     const strip = stripDebug.componentInstance as ForecastStripComponent;
     expect(strip.days()).toEqual(mockForecast.daily);
+  });
 
-    const bg = bgDebug.componentInstance as AnimatedBackgroundComponent;
-    expect(bg.theme().category).toBe('clear');
+  it('pushes the derived theme into WeatherThemeStateService so the shell-level background reflects it', () => {
+    const weatherThemeStateService = TestBed.inject(WeatherThemeStateService);
+    fixture.detectChanges();
+
+    component.onCitySelected('Ankara');
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    // recentCities effect triggers a MultiCityWeatherService fetch for the 1 recent city
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+    fixture.detectChanges();
+
+    expect(weatherThemeStateService.theme().category).toBe('clear');
   });
 
   it('renders a role="alert" element with the error text in the DOM when the request fails', () => {
