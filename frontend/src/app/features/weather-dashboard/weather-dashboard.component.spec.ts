@@ -95,6 +95,25 @@ describe('WeatherDashboardComponent', () => {
     expect(component.forecast()?.cityName).toBe('Ankara');
   });
 
+  it('refetches when the same city is selected again via SelectedCityService (repeat top-bar search is not a silent no-op)', async () => {
+    const selectedCityService = TestBed.inject(SelectedCityService);
+    fixture.detectChanges();
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`).flush(mockForecast);
+
+    selectedCityService.select('Ankara');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const secondReq = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/Ankara`);
+    secondReq.flush(mockForecast);
+
+    expect(component.forecast()?.cityName).toBe('Ankara');
+  });
+
   // --- Supplementary DOM/localStorage-level coverage (added on review) ---
 
   it('renders app-weather-hero, app-forecast-strip, and app-animated-background with correctly bound inputs after a successful search (DOM)', () => {
