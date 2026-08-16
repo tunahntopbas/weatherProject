@@ -1,14 +1,22 @@
 # WeatherProject
 
-Angular + .NET tabanlı hava durumu uygulaması. DevOps öğrenme projesi olarak; Docker, Kubernetes, CI/CD ve izleme (Grafana/Prometheus) katmanları eklenerek geliştiriliyor.
+Angular + .NET tabanlı hava durumu uygulaması — kurumsal bir yazılımın geçtiği
+tüm aşamaları (kod → container → sanal makine → Kubernetes → loglama →
+monitoring → CI/CD) uçtan uca uygulayan bir DevOps öğrenme projesi. Mimari
+kararların ve gerekçelerinin tamamı için: [`docs/architecture-overview.md`](docs/architecture-overview.md).
 
 ## Mimari
 
-- **Frontend:** Angular
-- **Backend:** ASP.NET Core (.NET 10), katmanlı mimari (Domain / Application / Infrastructure / Api)
+- **Frontend:** Angular (`frontend/`)
+- **Backend:** ASP.NET Core (.NET 10), katmanlı mimari — Domain / Application / Infrastructure / Api (`backend/`)
 - **Veritabanı:** PostgreSQL
 - **Cache:** Redis
 - **Dış servis:** Open-Meteo API (API anahtarı gerektirmez)
+- **Container:** Docker, multi-stage image'lar + docker-compose
+- **Orkestrasyon:** Kubernetes (k3s + Rancher), manifestler `k8s/`
+- **Loglama:** ElasticSearch + Kibana + Filebeat, `k8s/logging/`
+- **Monitoring:** Prometheus + Grafana + node-exporter, `k8s/monitoring/`
+- **CI/CD:** GitHub Actions, self-hosted runner — push'ta otomatik build/test/deploy, `.github/workflows/`
 
 ### Sayfalar
 

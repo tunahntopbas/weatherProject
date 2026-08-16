@@ -90,17 +90,20 @@ Bu yapı Plan 2'de (`02-backend-dotnet.md`) birebir solution/proje adları
 olarak kullanılacaktır: `WeatherProject.Domain`, `WeatherProject.Application`,
 `WeatherProject.Infrastructure`, `WeatherProject.Api`.
 
-## 5. Sonraki Planlar (Sıra)
+## 5. Uygulama Sırası ve Durumu
 
-1. `02-backend-dotnet.md` — .NET backend, PostgreSQL, Redis
-2. `03-frontend-angular.md` — Angular arayüz
-3. `04-containerization-docker.md` — Docker image + docker-compose
-4. `05-virtualbox-ubuntu-vm.md` — VirtualBox + Ubuntu VM'ler (3 node)
-5. `06-kubernetes-rancher.md` — Rancher cluster kurulumu + kubectl CLI + deploy
-6. `07-logging-elk.md` — ElasticSearch + Kibana
-7. `08-monitoring-grafana.md` — Grafana dashboard
-8. `09-cicd-azure-devops.md` — Azure DevOps pipeline
-9. `10-dns-erisim.md` — Local + Global DNS
+Aşağıdaki 9 aşama, sırasıyla tamamlandı — her aşama bir öncekinin ürettiği
+bileşenlerin üzerine kuruldu:
 
-Her plan, kendinden önceki planların ürettiği dosya/isimlere referans
-verecek şekilde yazılır.
+1. **.NET backend** — Clean Architecture (Domain/Application/Infrastructure/Api), PostgreSQL, Redis (`backend/`)
+2. **Angular arayüz** — 4 sayfalı SPA, gerçek routing (`frontend/`)
+3. **Docker** — multi-stage image'lar + docker-compose (`docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`)
+4. **VirtualBox + Ubuntu VM** — Kubernetes'in çalışacağı sunucu ortamı
+5. **Kubernetes (k3s + Rancher)** — cluster kurulumu, uygulama deploy'u (`k8s/`)
+6. **Loglama (ELK)** — ElasticSearch + Kibana + Filebeat (`k8s/logging/`)
+7. **Monitoring (Prometheus + Grafana)** — metrik toplama + dashboard (`k8s/monitoring/`)
+8. **CI/CD (GitHub Actions)** — push'ta otomatik build/test/deploy (`.github/workflows/`)
+9. **DNS erişimi** — `nip.io` ile isimle erişim (yerel), Cloudflare Tunnel şablonu hazır (global, `k8s/cloudflared-deployment.example.yaml`)
+
+Planlanandan sapan kararlar (tek node vs. 3 node, GitHub Actions vs. Azure
+DevOps gibi) ve gerekçeleri projenin geliştirme sürecinde belgelendi.

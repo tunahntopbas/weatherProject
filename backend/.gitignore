@@ -24,3 +24,6 @@ Thumbs.db
 # Local environment
 local.settings.json
 *.log
+
+# Corporate proxy root CA — never publish; CI writes it from a GitHub secret
+websense-root-ca.crt

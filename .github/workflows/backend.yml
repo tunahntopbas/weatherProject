@@ -22,6 +22,9 @@ jobs:
       - name: Test
         run: dotnet test backend/WeatherProject.sln --configuration Release --no-build
 
+      - name: Write corporate root CA (not committed to repo)
+        run: printf '%s' "${{ secrets.WEBSENSE_ROOT_CA }}" > backend/websense-root-ca.crt
+
       - name: Build Docker image
         run: docker build -t weatherproject-backend:latest ./backend
 
