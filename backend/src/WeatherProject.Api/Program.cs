@@ -1,6 +1,7 @@
 using System.Net.Security;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using WeatherProject.Application.Interfaces;
@@ -54,6 +55,25 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 
 app.UseHttpMetrics();
+
+// UseHttpMetrics'ten SONRA kayitli olmali: prometheus-net'in metrik ortasi
+// (finally blogu) response.StatusCode'u burada zaten 500'e cekilmis halde
+// okusun diye. Once kayitli olsaydi exception, metrik ortasindan gectikten
+// sonra yakalanir ve istekler yanlislikla code=200 olarak sayilirdi.
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(exception, "Unhandled exception while processing {Path}", context.Request.Path);
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = "Beklenmeyen bir hata olustu." });
+    });
+});
+
 app.MapMetrics();
 
 app.MapControllers();
