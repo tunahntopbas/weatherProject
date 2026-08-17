@@ -102,8 +102,11 @@ bileşenlerin üzerine kuruldu:
 5. **Kubernetes (k3s + Rancher)** — cluster kurulumu, uygulama deploy'u (`k8s/`)
 6. **Loglama (ELK)** — ElasticSearch + Kibana + Filebeat (`k8s/logging/`)
 7. **Monitoring (Prometheus + Grafana)** — metrik toplama + dashboard (`k8s/monitoring/`)
-8. **CI/CD (GitHub Actions)** — push'ta otomatik build/test/deploy (`.github/workflows/`)
+8. **CI/CD (Azure DevOps Pipelines)** — push'ta otomatik build/test/deploy (`azure-pipelines/`), self-hosted agent ile k3s'e deploy. Detaylı anlatım: `docs/08-cicd-azure-devops.md`
 9. **DNS erişimi** — `nip.io` ile isimle erişim (yerel), Cloudflare Tunnel şablonu hazır (global, `k8s/cloudflared-deployment.example.yaml`)
 
-Planlanandan sapan kararlar (tek node vs. 3 node, GitHub Actions vs. Azure
-DevOps gibi) ve gerekçeleri projenin geliştirme sürecinde belgelendi.
+Planlanandan sapan kararlar (tek node vs. 3 node gibi) ve gerekçeleri
+projenin geliştirme sürecinde belgelendi. CI/CD katmanı önce GitHub Actions
+ile kuruldu, sonra orijinal plana dönülerek Azure DevOps Pipelines'a
+taşındı — bu geçişin gerekçesi ve adımları `docs/08-cicd-azure-devops.md`
+içinde.
