@@ -11,7 +11,7 @@
     <div class="dashboard__empty">
       <ng-container *ngTemplateOutlet="recentBlock" />
       @if (!errorMessage()) {
-        <p class="dashboard__hint">Bir il secin, anlik hava durumunu ve haftalik tahmini gorun.</p>
+        <p class="dashboard__hint">Bir il secin, anlik hava durumunu ve haftalik tahmini gorun. (CI/CD demo)</p>
       }
       @if (errorMessage(); as msg) {
         <p class="dashboard__error" role="alert">{{ msg }}</p>
