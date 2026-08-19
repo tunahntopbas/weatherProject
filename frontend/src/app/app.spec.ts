@@ -15,10 +15,12 @@ describe('App', () => {
     }).compileComponents();
   });
 
+  // varsayilan 5sn timeout, ilk componentin agir TestBed derlemesini
+  // karsilamaya yetmiyor - CI makinesi yukluyken flaky timeout aliyordu
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     expect(fixture.componentInstance).toBeTruthy();
-  });
+  }, 15000);
 
   it('renders the sidebar, top bar chrome, and animated background', () => {
     const fixture = TestBed.createComponent(App);
