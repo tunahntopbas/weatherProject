@@ -1,3 +1,6 @@
+# Filebeat her node'da /var/log/containers altini okuyup Elasticsearch'e
+# gonderen "log shipper". Bu yuzden node'daki tum pod'lari/namespace'leri
+# gorebilmesi lazim - asagidaki ClusterRole/Binding tam bunun icin.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -26,6 +29,9 @@ roleRef:
   name: filebeat
   apiGroup: rbac.authorization.k8s.io
 ---
+# NODE_NAME asagida DaemonSet'te fieldRef ile enjekte ediliyor - her filebeat
+# kopyasi sadece kendi calistigi node'un loglarina bakiyor, boylece ayni log
+# birden fazla kez okunup Elasticsearch'e cift yazilmiyor
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -39,6 +45,8 @@ data:
           node: ${NODE_NAME}
           hints.enabled: true
           templates:
+            # su an sadece weather-app namespace'indeki container loglari toplaniyor -
+            # kibana ve elasticsearch'in kendi loglari (dongu olmasin diye) disarida birakildi
             - condition:
                 contains:
                   kubernetes.namespace: weather-app

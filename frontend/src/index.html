@@ -3,11 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>Hava Durumu</title>
+  <!-- base href="/" onemli: Angular router bu deger uzerinden calisiyor,
+       nginx.conf'taki try_files de bunun sayesinde her rotayi index.html'e dusurebiliyor -->
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+  <!-- Angular burada acilip App component'ini basiyor, bkz. main.ts -->
   <app-root></app-root>
 </body>
 </html>

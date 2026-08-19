@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CityWeatherCardComponent } from './city-weather-card.component';
 import { CityWeatherSummary } from '../../core/services/multi-city-weather.service';
 
+// basarili ve basarisiz (failed:true) durumlarda kartin dogru icerigi
+// gosterdigini kontrol ediyor
 describe('CityWeatherCardComponent', () => {
   let fixture: ComponentFixture<CityWeatherCardComponent>;
 

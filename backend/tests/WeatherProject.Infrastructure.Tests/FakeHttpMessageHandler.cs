@@ -2,6 +2,9 @@ using System.Net;
 
 namespace WeatherProject.Infrastructure.Tests;
 
+// HttpClient'in gercek soket acmasini engelleyip sabit bir cevap dondurur.
+// HttpClient'in SocketsHttpHandler'i yerine test'te bu geciriliyor
+// (AddHttpClient sonrasi ConfigurePrimaryHttpMessageHandler ile).
 public class FakeHttpMessageHandler : HttpMessageHandler
 {
     private readonly HttpStatusCode _statusCode;

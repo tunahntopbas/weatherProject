@@ -8,6 +8,9 @@ import { environment } from '../../../environments/environment';
 export class WeatherService {
   private readonly http = inject(HttpClient);
 
+  // apiBaseUrl bos oldugu icin bu istek hep goreceli /api/... yoluna gidiyor -
+  // sehir adinda bosluk/ozel karakter olabilir (orn. "Afyonkarahisar" degil de
+  // kullanicinin serbest yazdigi bir isim), encodeURIComponent bunu URL-guvenli hale getiriyor
   getCurrentWeather(cityName: string): Observable<WeatherForecast> {
     return this.http.get<WeatherForecast>(`${environment.apiBaseUrl}/api/weather/${encodeURIComponent(cityName)}`);
   }

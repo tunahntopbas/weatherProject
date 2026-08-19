@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CityAutocompleteComponent } from './city-autocomplete.component';
 
+// filtreleme, klavye ile gezinme (ok tuslari + Enter) ve secim davranisi test ediliyor
 describe('CityAutocompleteComponent', () => {
   let fixture: ComponentFixture<CityAutocompleteComponent>;
   let component: CityAutocompleteComponent;

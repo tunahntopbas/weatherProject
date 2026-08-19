@@ -1,3 +1,6 @@
+<!-- alttaki #recentBlock template'i iki farkli durumda da (forecast var/yok)
+     ayni "son bakilanlar" bolumunu gostermek icin - kod tekrarindan kacinmak icin
+     asagida ng-template olarak tanimlanip her iki dalda da *ngTemplateOutlet ile cagriliyor -->
 <main class="dashboard">
   @if (forecast(); as f) {
     <div class="dashboard__grid">

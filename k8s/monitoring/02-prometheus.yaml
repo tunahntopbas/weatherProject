@@ -1,3 +1,6 @@
+# Prometheus'un kalbi: hangi hedefleri, ne siklikta scrape edecegini burada
+# tanimliyoruz. Grafana burada yok - Grafana sadece bu toplanan veriyi sorgulayip
+# gosteriyor, kendisi hicbir metrigi dogrudan toplamiyor.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,15 +12,23 @@ data:
       scrape_interval: 15s
 
     scrape_configs:
+      # her 3 node'daki node-exporter'dan CPU/RAM/disk metrikleri - IP'ler
+      # sabit yazildi cunku VirtualBox host-only agindaki adresler degismiyor
       - job_name: 'node-exporter'
         static_configs:
           - targets:
-              - '10.0.2.15:9100'
+              - '192.168.56.11:9100'
+              - '192.168.56.12:9100'
+              - '192.168.56.13:9100'
 
+      # pod/deployment/node sayisi gibi Kubernetes objelerinin durumunu metrige
+      # ceviren bilesen - k8s API'sinden okuyup Prometheus formatinda sunuyor
       - job_name: 'kube-state-metrics'
         static_configs:
           - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
 
+      # backend'in kendi /metrics endpoint'i (Program.cs'deki MapMetrics) -
+      # istek sayisi, sure, hata orani gibi uygulama-seviyesi metrikler buradan geliyor
       - job_name: 'weather-backend'
         metrics_path: /metrics
         static_configs:
@@ -74,6 +85,16 @@ spec:
   ingressClassName: traefik
   rules:
     - host: prometheus.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus
+                port:
+                  number: 9090
+    - host: prometheus.192.168.56.11.nip.io
       http:
         paths:
           - path: /

@@ -2,6 +2,8 @@ import { effect } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { SelectedCityService } from './selected-city.service';
 
+// asil test ettigi sey: equal:()=>false sayesinde ayni sehir ust uste secilse
+// bile signal'in yine de tetiklendigi (effect() calisir mi diye kontrol)
 describe('SelectedCityService', () => {
   let service: SelectedCityService;
 

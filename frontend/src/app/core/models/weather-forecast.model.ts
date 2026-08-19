@@ -1,3 +1,6 @@
+// backend'deki WeatherForecast/DailyForecast entity'lerinin (Domain katmani)
+// JSON karsiligi - alan adlari birebir ayni tutuldu, backend'in donduugu JSON
+// dogrudan bu interface'e map ediliyor, ayri bir donusum katmani yok
 export interface DailyForecast {
   date: string;
   weatherCode: number;

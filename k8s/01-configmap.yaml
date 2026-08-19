@@ -1,3 +1,4 @@
+# gizli olmayan ayarlar burada, sifre gibi hassas degerler 01-secret.example.yaml'da
 apiVersion: v1
 kind: ConfigMap
 metadata:

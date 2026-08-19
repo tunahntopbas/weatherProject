@@ -2,6 +2,10 @@ using WeatherProject.Domain.Entities;
 
 namespace WeatherProject.Infrastructure.Caching;
 
+// WeatherForecast'in JSON'a cevrilebilir hali. Domain entity'sinin constructor'i
+// zorunlu parametre aliyor ve immutable (setter yok) - System.Text.Json boyle bir
+// siniifi deserialize ederken zorlaniyor. Bu yuzden Redis'e yazarken/okurken
+// araya bu DTO giriyor, Domain katmani JSON serialization'dan tamamen habersiz kaliyor.
 internal class WeatherForecastDto
 {
     public string CityName { get; set; } = string.Empty;

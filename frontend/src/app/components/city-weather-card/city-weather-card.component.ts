@@ -10,10 +10,14 @@ import { ProvinceBadgeComponent } from '../province-badge/province-badge.compone
   templateUrl: './city-weather-card.component.html',
   styleUrl: './city-weather-card.component.scss',
 })
+// harita/karsilastirma sayfalarinda kucuk bir kart olarak bir sehri gosterir -
+// il plakasi rozeti + sicaklik + ikon. Tiklaninca "select" ile disariya sehir
+// ismini bildirir, kendi icinde navigasyon yapmaz (onu cagiran karar verir)
 export class CityWeatherCardComponent {
   readonly summary = input.required<CityWeatherSummary>();
   readonly select = output<string>();
 
+  // weatherCode null ise (ornegin veri hic gelmediyse) ikon yerine tire goster
   readonly icon = computed(() => {
     const code = this.summary().weatherCode;
     return code === null ? '—' : WEATHER_CATEGORY_ICON[weatherCategoryFromCode(code)];

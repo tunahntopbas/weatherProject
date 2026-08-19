@@ -1,3 +1,6 @@
+# loglama yigini (Elasticsearch + Kibana + Filebeat) kendi namespace'inde -
+# uygulamadan ayri tutulmasinin sebebi: bu bilesenler tum cluster'i izliyor,
+# tek bir namespace'e ozel degiller
 apiVersion: v1
 kind: Namespace
 metadata:

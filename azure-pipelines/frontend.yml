@@ -1,3 +1,6 @@
+# backend.yml ile ayni mantik: sadece frontend/ degisince tetiklensin diye
+# ayri pipeline + path filtresi (ikisi tek pipeline olsaydi her degisiklikte
+# ikisi de gereksiz yere calisirdi)
 trigger:
   branches:
     include:
@@ -35,10 +38,12 @@ jobs:
       - script: docker build -t weatherproject-frontend:latest ./frontend
         displayName: Build Docker image
 
+      # bkz. backend.yml'deki ayni adimin notu - image artik yerel node yerine
+      # cluster ici registry'ye push ediliyor
       - script: |
-          docker tag weatherproject-frontend:latest weather-frontend:local
-          docker save weather-frontend:local | sudo k3s ctr images import -
-        displayName: Import image into k3s containerd
+          docker tag weatherproject-frontend:latest 192.168.56.11:30500/weather-frontend:latest
+          docker push 192.168.56.11:30500/weather-frontend:latest
+        displayName: Push image to cluster registry
 
       - script: |
           kubectl rollout restart deployment frontend -n weather-app

@@ -18,6 +18,9 @@
   @if (isOpen() && suggestions().length > 0) {
     <ul class="autocomplete__list" role="listbox">
       @for (city of suggestions(); track city; let i = $index) {
+        <!-- (click) degil (mousedown) kullanildi: mousedown, input'un (blur)
+             olayindan once tetiklenir - click kullansaydik blur once devreye
+             girip listeyi kapatir, tiklama hicbir zaman secim yapamazdi -->
         <li
           class="autocomplete__option"
           [class.autocomplete__option--active]="i === activeIndex()"

@@ -10,6 +10,9 @@ interface DayPoint {
   y: number;
 }
 
+// SVG viewBox boyutlari - gercek piksel degil, oran cizimi icin sabit bir
+// koordinat alani. CSS tarafinda strip__line bunu container genisligine gore
+// otomatik olcekliyor (preserveAspectRatio="none")
 const VIEW_WIDTH = 700;
 const VIEW_HEIGHT = 60;
 
@@ -19,11 +22,15 @@ const VIEW_HEIGHT = 60;
   templateUrl: './forecast-strip.component.html',
   styleUrl: './forecast-strip.component.scss',
 })
+// 7 gunluk tahmini kucuk bir cizgi grafik + gunluk min/max olarak gosteren serit.
+// Herhangi bir chart kutuphanesi kullanilmiyor, SVG path'i elle hesaplaniyor
 export class ForecastStripComponent {
   readonly days = input.required<DailyForecast[]>();
 
   readonly viewBox = `0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`;
 
+  // her gunun sicakligini SVG koordinatina cevirir - en yuksek/dusuk sicakliga
+  // gore normalize edilir (range hesabi), boylece grafik her zaman tam yuksekligi kullanir
   readonly points = computed<DayPoint[]>(() => {
     const days = this.days();
     if (days.length === 0) return [];
@@ -31,6 +38,7 @@ export class ForecastStripComponent {
     const maxes = days.map((d) => d.tempMaxCelsius);
     const highest = Math.max(...maxes);
     const lowest = Math.min(...maxes);
+    // tum gunler ayni sicaklikta olursa range 0 olur, sifira bolme hatasi olmasin diye 1'e sabitlendi
     const range = highest - lowest || 1;
 
     return days.map((d, i) => {
@@ -47,6 +55,7 @@ export class ForecastStripComponent {
     });
   });
 
+  // points'teki noktalari SVG <path> "d" attribute'una cevirir (M=basla, L=cizgi cek)
   readonly linePath = computed(() => {
     const pts = this.points();
     if (pts.length === 0) return '';

@@ -4,6 +4,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { WeatherService } from './weather.service';
 import { environment } from '../../../environments/environment';
 
+// gercek backend'e gitmiyor, HttpTestingController ile istekler yakalanip
+// sahte cevap veriliyor - servisin dogru URL'e dogru sekilde istek attigini test eder
 describe('WeatherService', () => {
   let service: WeatherService;
   let httpMock: HttpTestingController;

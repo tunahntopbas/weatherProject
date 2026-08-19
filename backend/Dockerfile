@@ -1,6 +1,12 @@
+# multi-stage build: bu ilk asama (build) sadece derlemek icin var, SDK image'i
+# (~800MB, derleyici dahil) son image'a hic girmiyor - asagida ikinci FROM ile
+# sadece derlenmis cikti kucuk bir runtime image'ina kopyalaniyor
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# once sadece .csproj dosyalari kopyalanip restore yapiliyor, kaynak kod (asagida)
+# ayri bir COPY ile geliyor - boylece sadece kod degisince (csproj ayniysa) Docker
+# layer cache'i restore adimini atlar, her build'de NuGet paketleri yeniden inmez
 COPY WeatherProject.sln ./
 COPY src/WeatherProject.Domain/WeatherProject.Domain.csproj src/WeatherProject.Domain/
 COPY src/WeatherProject.Application/WeatherProject.Application.csproj src/WeatherProject.Application/
@@ -16,6 +22,8 @@ RUN dotnet publish src/WeatherProject.Api/WeatherProject.Api.csproj -c Release -
 # kendi sertifikasiyla yeniden imzaliyor. Container'in kendi trust store'u host
 # OS'tan izole oldugu icin bu CA'yi ayrica burada guvenilir kilmazsak, dis API
 # cagrilari (Open-Meteo) sertifika dogrulama hatasiyla basarisiz olur.
+# asagisi ikinci (son) asama: sadece calistirmaya yeten kucuk runtime image'i
+# (~200MB), SDK yok - derlenmis publish ciktisi tek satirda kopyalaniyor
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .

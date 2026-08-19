@@ -1,3 +1,6 @@
+# clusterIP: None -> "headless service". Normal Service tek bir sanal IP verir,
+# headless olan ise dogrudan pod IP'sine cozulur - StatefulSet'in her pod'una
+# kendi kimligiyle (postgres-0.postgres gibi) erisebilmek icin bu gerekiyor.
 apiVersion: v1
 kind: Service
 metadata:
@@ -11,6 +14,9 @@ spec:
     - port: 5432
       targetPort: 5432
 ---
+# StatefulSet secildi (Deployment degil) cunku Postgres gercek veri tutuyor:
+# pod yeniden olustursa bile ayni diske (PVC) baglanmali. replicas:1 oldugu
+# icin cok node arasi replikasyon yok, tek node'a sabitlenmis basit bir kurulum.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -44,12 +50,17 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+          # pg_isready ile gercekten baglanti kabul edip etmedigini kontrol ediyoruz,
+          # sadece process ayakta mi diye bakmiyoruz - backend bu hazir olmadan
+          # baglanmaya calisirsa hata alir
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "weatherproject", "-d", "weatherproject"]
             periodSeconds: 2
             timeoutSeconds: 3
             failureThreshold: 15
+  # StatefulSet'e ozel: her pod kendi PVC'sini otomatik alir (postgres-data-postgres-0
+  # gibi). Deployment'ta boyle degil, tum replikalar ayni volume'u paylasmaya calisirdi.
   volumeClaimTemplates:
     - metadata:
         name: postgres-data

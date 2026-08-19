@@ -9,6 +9,9 @@ import { SelectedCityService } from '../../../core/services/selected-city.servic
   templateUrl: './top-bar.component.html',
   styleUrl: './top-bar.component.scss',
 })
+// ust bardaki logo/tarih + sehir arama kutusunu barindiran kabuk component.
+// Arama sonucu secilince gercek is SelectedCityService'e devrediliyor,
+// TopBarComponent kendisi hicbir hava durumu verisi tutmuyor
 export class TopBarComponent {
   private readonly selectedCityService = inject(SelectedCityService);
   private readonly router = inject(Router);

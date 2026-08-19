@@ -6,6 +6,8 @@ import { TopBarComponent } from './top-bar.component';
 import { CityAutocompleteComponent } from '../../city-autocomplete/city-autocomplete.component';
 import { SelectedCityService } from '../../../core/services/selected-city.service';
 
+// sehir secilince SelectedCityService'e dogru isim gidiyor mu ve anasayfaya
+// yonlendirme (navigate) tetikleniyor mu diye kontrol ediliyor
 describe('TopBarComponent', () => {
   let fixture: ComponentFixture<TopBarComponent>;
   let selectedCityService: SelectedCityService;

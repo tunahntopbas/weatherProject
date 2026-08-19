@@ -1,3 +1,8 @@
+// bu dosya Angular servisi degil (Injectable yok), sadece Open-Meteo'nun WMO
+// weather code'unu (backend'deki OpenMeteoProvider.cs'deki WeatherCodeDescriptions
+// ile ayni kod listesi) gorsel bir temaya (gradient, partikul efekti, arka plan
+// resmi) cevrilen saf fonksiyonlar ve lookup tablolari - animated-background
+// component'i bunu kullaniyor
 export type WeatherCategory = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'storm';
 export type ParticleType = 'rain' | 'snow' | 'clouds' | 'sun-rays' | 'stars' | 'fog-bands' | 'lightning';
 
@@ -10,6 +15,8 @@ export interface WeatherTheme {
   backgroundImageUrl: string;
 }
 
+// 7 kategoriye indirgeniyor - Open-Meteo'nun tum kod ceslitliligini (0-99 arasi
+// onlarca kod) tek tek gorsele baglamak yerine benzer kodlar ayni temayi paylasiyor
 const CATEGORY_BY_CODE: Record<number, WeatherCategory> = {
   0: 'clear', 1: 'clear',
   2: 'cloudy', 3: 'cloudy',
@@ -94,6 +101,9 @@ export function weatherCategoryFromCode(weatherCode: number): WeatherCategory {
   return CATEGORY_BY_CODE[weatherCode] ?? 'cloudy';
 }
 
+// isDay parametresi hem gradient (gunduz/gece iki ayri versiyon) hem partikul
+// secimini etkiliyor - "clear" kategorisi ozel durum: gunduz gunes isini,
+// gece yildizlari gosteriyor, diger kategorilerde gun/gece farki sadece gradient'te
 export function resolveWeatherTheme(weatherCode: number, isDay: boolean): WeatherTheme {
   const category = weatherCategoryFromCode(weatherCode);
   const particle: ParticleType =

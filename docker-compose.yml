@@ -1,3 +1,6 @@
+# yerel gelistirme icin: "docker compose up" tek komutla tum bagimliklari
+# (postgres, redis) + uygulamayi (backend, frontend) ayaga kaldirir. Kubernetes'in
+# kucuk/tek makineli hali gibi dusunulebilir ama cluster/scheduler yok, tek host'ta calisir.
 services:
   postgres:
     image: postgres:16-alpine
@@ -9,6 +12,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    # backend'in "depends_on: condition: service_healthy" ile bekleyecegi kontrol -
+    # postgres process'i baslamis olsa bile baglanti henuz kabul etmiyor olabilir,
+    # pg_isready gercekten hazir mi diye soruyor
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U weatherproject -d weatherproject"]
       interval: 2s
@@ -33,6 +39,9 @@ services:
       ConnectionStrings__Redis: "redis:6379"
     ports:
       - "5000:8080"
+    # sadece process ayakta olmasi yetmiyor - postgres/redis gercekten baglanti
+    # kabul edene kadar backend hic baslamiyor, yoksa ilk saniyelerde connection
+    # refused hatasiyla crash loop'a girer
     depends_on:
       postgres:
         condition: service_healthy

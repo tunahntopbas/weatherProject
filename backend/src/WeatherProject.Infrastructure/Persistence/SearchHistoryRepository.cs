@@ -4,6 +4,10 @@ using WeatherProject.Domain.Entities;
 
 namespace WeatherProject.Infrastructure.Persistence;
 
+// ISearchHistoryRepository'nin EF Core / Postgres implementasyonu.
+// WeatherController her basarili aramadan sonra AddAsync'i cagirip bu tabloya
+// kaydediyor - "GetRecentAsync" tarafi ise ileride bir "son aramalar" ozelligi
+// icin hazir bekliyor, su an frontend'de kullanilmiyor.
 public class SearchHistoryRepository : ISearchHistoryRepository
 {
     private readonly WeatherDbContext _context;

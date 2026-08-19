@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink, RouterLinkActive } from '@angular/router';
 import { SidebarComponent } from './sidebar.component';
 
+// link sayisi ve hangi linkin "exact" routerLinkActive kullandigi test ediliyor
 describe('SidebarComponent', () => {
   let fixture: ComponentFixture<SidebarComponent>;
 

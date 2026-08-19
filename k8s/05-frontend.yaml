@@ -27,11 +27,18 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: weather-frontend:local
-          imagePullPolicy: Never
+          # backend ile ayni sebep: image artik cluster ici registry'den cekiliyor,
+          # tek node'a bagimli degil (bkz. 04-backend.yaml'daki notu)
+          image: 192.168.56.11:30500/weather-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
 ---
+# nip.io: gercek domain almadan, IP'yi adin icine gomup otomatik cozen ucretsiz
+# DNS servisi. Iki host da ayni yere gidiyor - 127.0.0.1 versiyonu VM'in kendi
+# icinden calisirken, gercek IP'li (192.168.56.11) versiyonu Windows host'tan
+# tarayiciyla girerken kullaniliyor (127.0.0.1 versiyonu Windows'ta localhost'a
+# cozulup VM'e degil kendi makineye gider, bu yuzden ikisine de ihtiyac var)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -41,6 +48,16 @@ spec:
   ingressClassName: traefik
   rules:
     - host: weather.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    - host: weather.192.168.56.11.nip.io
       http:
         paths:
           - path: /

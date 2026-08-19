@@ -4,6 +4,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { MultiCityWeatherService, CityWeatherSummary } from './multi-city-weather.service';
 import { environment } from '../../../environments/environment';
 
+// forkJoin ile paralel isteklerin dogru birlestigini ve bir istegin basarisiz
+// olmasi durumunda digerlerinin etkilenmedigini (failed:true ile devam ettigini) test eder
 describe('MultiCityWeatherService', () => {
   let service: MultiCityWeatherService;
   let httpMock: HttpTestingController;

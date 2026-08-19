@@ -9,6 +9,9 @@ using Xunit;
 
 namespace WeatherProject.Api.Tests;
 
+// Uctan uca test: WebApplicationFactory ile gercek uygulamayi ayaga kaldirip
+// HTTP istegi atiyor. Sadece ISearchHistoryRepository mock'lanmis (DB'ye
+// dokunmasin diye), geri kalan pipeline (routing, middleware) gercek.
 public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;

@@ -11,6 +11,9 @@ import { ProvinceBadgeComponent } from '../province-badge/province-badge.compone
   templateUrl: './weather-hero.component.html',
   styleUrl: './weather-hero.component.scss',
 })
+// anasayfadaki buyuk baslik karti: sicaklik, sehir adi, ruzgar/nem ve favori
+// yildizi. Kendi basina veri cekmiyor, forecast/theme'i disaridan (dashboard
+// component'inden) input olarak aliyor - saf gosterim bileseni
 export class WeatherHeroComponent {
   private readonly favoritesService = inject(FavoritesService);
 

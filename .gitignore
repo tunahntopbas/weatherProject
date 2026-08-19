@@ -1,4 +1,10 @@
 .env
 
-# Internal AI planning workspace — kept locally, not published
+# Kisisel calisma notlarim - repoya girmesin
 docs/superpowers/
+
+# Kurumsal TLS-inceleme kok sertifikasi - makineye ozel, asla paylasilmaz
+backend/websense-root-ca.crt
+
+# Oturuma ozel yerel dosyalar
+.claude/

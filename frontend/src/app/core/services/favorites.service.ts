@@ -1,5 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 
+// favoriler backend'e/DB'ye hic gitmiyor, tamamen tarayicinin localStorage'inda
+// tutuluyor - kullanici bazli bir "hesap" olmadigi icin en basit cozum bu,
+// sayfa yenilense de tarayici kapanip acilsa da kalici
 const FAVORITES_KEY = 'weather-favorite-cities';
 
 @Injectable({ providedIn: 'root' })

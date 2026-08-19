@@ -1,3 +1,6 @@
+// fontlar Google Fonts CDN'den degil, dogrudan public/fonts altindan servis
+// ediliyor - dis bir CDN'e bagimli olmadan build'e gomulu geliyor, ag kesintisi
+// veya CDN engellemesi olsa bile fontlar hep yuklenir
 @font-face {
   font-family: 'Fraunces';
   src: url('/fonts/Fraunces-Variable.ttf') format('truetype-variations');
@@ -46,6 +49,9 @@
   font-display: swap;
 }
 
+// tum renk/font/radius degerleri burada tek yerde tanimli (design token) -
+// component'ler dogrudan hex renk yazmiyor, hep bu degiskenleri kullaniyor,
+// boylece tema degisikligi tek dosyadan yonetilebiliyor
 :root {
   --color-bg: #e8edf0;
   --color-surface: #ffffff;
@@ -124,6 +130,8 @@ body {
   color: var(--color-on-glass-muted);
 }
 
+// hareket hassasiyeti olan kullanicilar icin (isletim sisteminde "reduce motion"
+// acikken) tum animasyon/gecisler neredeyse aninda bitiyor
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

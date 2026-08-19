@@ -4,6 +4,8 @@ import { WeatherForecast } from '../../core/models/weather-forecast.model';
 import { WeatherTheme } from '../../core/services/weather-theme.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 
+// forecast/theme verisinin dogru gosterildigi ve favori tuslamanin
+// FavoritesService'e dogru yansidigi test ediliyor
 describe('WeatherHeroComponent', () => {
   let fixture: ComponentFixture<WeatherHeroComponent>;
 

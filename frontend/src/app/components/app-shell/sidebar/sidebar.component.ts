@@ -7,4 +7,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
+// sol tarafta sabit duran ince navigasyon cubugu - state/logic yok, sadece
+// routerLink'lerle sayfalar arasi gecis. Butun mantik HTML/scss tarafinda
 export class SidebarComponent {}

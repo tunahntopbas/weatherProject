@@ -1,0 +1,753 @@
+<title>Docker ve Kubernetes Rehberi</title>
+<style>
+/* ---------- Fonts ---------- */
+@font-face { font-family: sys-mono; src: local("Cascadia Code"), local("Consolas"), local("Menlo"); }
+
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #e3e8ec;
+  --ink: #1a2230;
+  --ink-muted: #56606f;
+  --ink-faint: #7d8794;
+  --border: #ccd4dc;
+  --border-soft: #dde3e9;
+
+  --docker: #b85526;
+  --docker-ink: #7a3814;
+  --docker-soft: #f4e3d3;
+  --docker-soft-border: #e6c6a3;
+
+  --k8s: #1f6f78;
+  --k8s-ink: #124349;
+  --k8s-soft: #dcecec;
+  --k8s-soft-border: #b6d6d6;
+
+  --warn: #a3401e;
+  --warn-soft: #f7e0d5;
+
+  --code-bg: #1a2230;
+  --code-ink: #e7ebef;
+  --code-accent: #f0b978;
+
+  font-synthesis: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d;
+    --surface: #182029;
+    --surface-2: #1f2933;
+    --ink: #e7ebef;
+    --ink-muted: #a7b3bf;
+    --ink-faint: #7c8794;
+    --border: #2c3742;
+    --border-soft: #232d37;
+
+    --docker: #e08847;
+    --docker-ink: #f5c393;
+    --docker-soft: #2e2013;
+    --docker-soft-border: #4a3420;
+
+    --k8s: #56bcc2;
+    --k8s-ink: #a9dee1;
+    --k8s-soft: #142a2a;
+    --k8s-soft-border: #1f4244;
+
+    --warn: #e0855c;
+    --warn-soft: #2e2016;
+
+    --code-bg: #0e1218;
+    --code-ink: #dbe2e8;
+    --code-accent: #f0b978;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12161d;
+  --surface: #182029;
+  --surface-2: #1f2933;
+  --ink: #e7ebef;
+  --ink-muted: #a7b3bf;
+  --ink-faint: #7c8794;
+  --border: #2c3742;
+  --border-soft: #232d37;
+
+  --docker: #e08847;
+  --docker-ink: #f5c393;
+  --docker-soft: #2e2013;
+  --docker-soft-border: #4a3420;
+
+  --k8s: #56bcc2;
+  --k8s-ink: #a9dee1;
+  --k8s-soft: #142a2a;
+  --k8s-soft-border: #1f4244;
+
+  --warn: #e0855c;
+  --warn-soft: #2e2016;
+
+  --code-bg: #0e1218;
+  --code-ink: #dbe2e8;
+  --code-accent: #f0b978;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hstack { font-family: ui-sans-serif, "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+
+h1, h2, h3, h4 {
+  font-family: ui-sans-serif, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 800;
+  color: var(--ink);
+  text-wrap: balance;
+  line-height: 1.15;
+  margin: 0;
+}
+
+code, pre, .mono, .filepath, .kbd {
+  font-family: ui-monospace, sys-mono, "Cascadia Code", Consolas, Menlo, monospace;
+}
+
+a { color: inherit; }
+
+/* ---------- Shell layout ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .toc { position: static !important; height: auto !important; border-right: none !important; border-bottom: 1px solid var(--border); }
+}
+
+.toc {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 28px 20px 40px;
+  border-right: 1px solid var(--border);
+  font-family: ui-sans-serif, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13.5px;
+}
+
+.toc-brand {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+.toc-sub {
+  color: var(--ink-faint);
+  font-size: 12px;
+  margin-bottom: 22px;
+}
+
+.toc-part {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  margin: 20px 0 8px;
+}
+.toc-part.docker { color: var(--docker-ink); }
+.toc-part.k8s { color: var(--k8s-ink); }
+
+.toc a {
+  display: block;
+  text-decoration: none;
+  color: var(--ink-muted);
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid transparent;
+}
+.toc a:hover { color: var(--ink); border-left-color: var(--border); }
+
+main { min-width: 0; padding: 48px clamp(20px, 5vw, 64px) 120px; }
+
+/* ---------- Cover ---------- */
+.cover {
+  margin-bottom: 56px;
+}
+.cover .eyebrow {
+  font-family: ui-monospace, sys-mono, monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+.cover h1 {
+  font-size: clamp(30px, 4.4vw, 46px);
+  max-width: 16ch;
+}
+.cover .dek {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  color: var(--ink-muted);
+  max-width: 62ch;
+  margin-top: 16px;
+}
+.cover-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+.cover-meta b { color: var(--ink-muted); font-weight: 700; }
+
+/* ---------- Section framing ---------- */
+.part-band {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 18px 22px;
+  border-radius: 10px;
+  margin: 64px 0 32px;
+}
+.part-band.docker { background: var(--docker-soft); border: 1px solid var(--docker-soft-border); }
+.part-band.k8s { background: var(--k8s-soft); border: 1px solid var(--k8s-soft-border); }
+.part-band .num {
+  font-family: ui-sans-serif, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.part-band.docker .num { color: var(--docker-ink); }
+.part-band.k8s .num { color: var(--k8s-ink); }
+.part-band h2 { font-size: 26px; }
+
+section.topic { margin: 44px 0; scroll-margin-top: 20px; }
+section.topic h3 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+section.topic p { margin: 14px 0; max-width: 74ch; }
+section.topic ul, section.topic ol { max-width: 74ch; padding-left: 22px; }
+section.topic li { margin: 8px 0; }
+
+.lede { font-size: 18.5px; color: var(--ink-muted); }
+
+/* ---------- Callouts ---------- */
+.why {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 20px 0;
+  max-width: 74ch;
+}
+.why .tag {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+.why.docker { border-left: 3px solid var(--docker); }
+.why.docker .tag { color: var(--docker-ink); }
+.why.k8s { border-left: 3px solid var(--k8s); }
+.why.k8s .tag { color: var(--k8s-ink); }
+.why p { margin: 6px 0; }
+
+.warn-box {
+  background: var(--warn-soft);
+  border: 1px solid var(--docker-soft-border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 20px 0;
+  max-width: 74ch;
+}
+.warn-box .tag { font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700; color: var(--warn); margin-bottom: 8px; }
+
+/* ---------- Code blocks ---------- */
+.code-panel {
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 18px 0;
+  overflow-x: auto;
+  max-width: 74ch;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.code-panel .cap {
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b97a3;
+  margin-bottom: 10px;
+}
+.code-panel pre { margin: 0; white-space: pre; }
+.code-panel .c1 { color: #7c8794; }
+.code-panel .kw { color: var(--code-accent); }
+.code-panel .str { color: #9cd1a0; }
+
+table.ref {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 74ch;
+  margin: 18px 0;
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 14px;
+}
+table.ref th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+table.ref td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+}
+table.ref td.k { font-family: ui-monospace, monospace; color: var(--ink); white-space: nowrap; }
+.scroll-x { overflow-x: auto; }
+
+.filepath {
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+figure { margin: 26px 0; max-width: 74ch; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption {
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 10px;
+  max-width: 60ch;
+}
+
+.qa {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 14px 0;
+  max-width: 74ch;
+  background: var(--surface);
+}
+.qa .q {
+  font-family: ui-sans-serif, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.qa .q::before { content: "S: "; color: var(--ink-faint); font-weight: 700; }
+.qa .a::before { content: "C: "; color: var(--k8s-ink); font-weight: 700; }
+
+.divider { height: 1px; background: var(--border-soft); margin: 48px 0; max-width: 74ch; }
+
+::selection { background: var(--docker-soft-border); }
+</style>
+
+<div class="shell">
+  <nav class="toc">
+    <div class="toc-brand hstack">Docker &amp; Kubernetes</div>
+    <div class="toc-sub">WeatherProject sunum rehberi</div>
+
+    <div class="toc-part">Giriş</div>
+    <a href="#giris">Bu doküman ne için</a>
+
+    <div class="toc-part docker">Bölüm 1 — Docker</div>
+    <a href="#d-problem">1.1 Hangi problemi çözer</a>
+    <a href="#d-vm">1.2 Container vs. Sanal Makine</a>
+    <a href="#d-image">1.3 Image vs. Container</a>
+    <a href="#d-dockerfile">1.4 Dockerfile anatomisi</a>
+    <a href="#d-multistage">1.5 Multi-stage build</a>
+    <a href="#d-cache">1.6 Layer cache sırası</a>
+    <a href="#d-compose">1.7 docker-compose</a>
+    <a href="#d-ca">1.8 Kurumsal CA kararı</a>
+
+    <div class="toc-part k8s">Bölüm 2 — Kubernetes</div>
+    <a href="#k-problem">2.1 Compose neden yetmez</a>
+    <a href="#k-mimari">2.2 Control Plane / Node</a>
+    <a href="#k-objeler">2.3 Temel objeler</a>
+    <a href="#k-harita">2.4 Proje manifest haritası</a>
+    <a href="#k-stateful">2.5 StatefulSet vs Deployment</a>
+    <a href="#k-network">2.6 Network: Service &amp; Ingress</a>
+    <a href="#k-rancher">2.7 Rancher nedir</a>
+    <a href="#k-olay">2.8 Gerçek olay: 3 node krizi</a>
+    <a href="#k-pipeline">2.9 Pipeline: nasıl oluşturduk</a>
+
+    <div class="toc-part">Sunum</div>
+    <a href="#qa">Olası sorular &amp; cevaplar</a>
+  </nav>
+
+  <main>
+    <div class="cover">
+      <div class="eyebrow">// weatherProject &mdash; devops defteri</div>
+      <h1>Docker ve Kubernetes'i sıfırdan anlama rehberi</h1>
+      <p class="dek">Bu proje üzerinden: container nedir, image nedir, Kubernetes neyi çözer, biz bu projede hangi kararı neden aldık. Yöneticine "neden böyle yaptın" ve "nasıl oluşturdun" sorularına doğrudan bu dokümandan cevap verebilirsin.</p>
+      <div class="cover-meta">
+        <span><b>Proje:</b> WeatherProject</span>
+        <span><b>Stack:</b> .NET API + Angular + Postgres + Redis</span>
+        <span><b>Cluster:</b> k3s / Rancher, 3 node (VirtualBox)</span>
+      </div>
+    </div>
+
+    <section id="giris" class="topic">
+      <p class="lede">Docker ve Kubernetes iki ayrı katman. Docker "bir uygulamayı nasıl paketlerim ve her yerde aynı şekilde çalıştırırım" sorusuna cevap verir. Kubernetes ise "bu paketlenmiş uygulamaları birden fazla makinede nasıl çalıştırır, ölçeklendirir ve ayakta tutarım" sorusuna cevap verir. İkisi birbirinin üstüne kurulur: Kubernetes, Docker'ın (veya benzeri bir container motorunun) ürettiği image'ları çalıştırır.</p>
+      <p>Bu doküman iki bölüm: önce Docker, sonra Kubernetes &mdash; her ikisi de kavramdan başlayıp bu projedeki gerçek dosyalara iniyor. Sarı/turuncu vurgu Docker bölümüne, teal/yeşil vurgu Kubernetes bölümüne ait; hangi bölümde olduğunu renkten de anlayabilirsin.</p>
+    </section>
+
+    <!-- ================= PART 1: DOCKER ================= -->
+    <div class="part-band docker">
+      <span class="num hstack">BÖLÜM 1</span>
+      <h2>Docker</h2>
+    </div>
+
+    <section id="d-problem" class="topic">
+      <h3>1.1 &mdash; Hangi problemi çözer</h3>
+      <p>Klasik senaryo: geliştirici kendi bilgisayarında kodu çalıştırır, çalışır. Aynı kodu sunucuya atarsın, çalışmaz. Sebep genelde aynıdır: sunucuda farklı bir .NET sürümü, eksik bir sistem kütüphanesi, farklı bir işletim sistemi ayarı vardır. Buna kısaca <b>"benim makinemde çalışıyordu"</b> problemi denir.</p>
+      <p>Docker'ın çözümü: uygulamayı sadece kodla değil, <b>çalışması için gereken her şeyle birlikte</b> paketlemek &mdash; runtime, kütüphaneler, ortam değişkenleri, dosya sistemi düzeni. Bu paket bir <b>image</b>'dır ve hangi makinede çalıştırılırsa çalıştırılsın, container motoru (Docker) varsa aynı şekilde davranır.</p>
+    </section>
+
+    <section id="d-vm" class="topic">
+      <h3>1.2 &mdash; Container, sanal makineden farklı</h3>
+      <p>Sanal makine (VM), fiziksel bir bilgisayarı komple taklit eder: kendi çekirdeği (kernel), kendi işletim sistemi kopyası vardır. Bir VM içinde Ubuntu çalıştırmak, host'un üstüne tam bir Ubuntu kurmak demektir &mdash; gigabaytlarca yer kaplar, açılması dakikalar sürer.</p>
+      <p>Container ise host makinenin <b>aynı Linux çekirdeğini paylaşır</b>; sadece işletim sistemi seviyesinde izolasyon uygular (Linux'un <span class="mono">namespaces</span> ve <span class="mono">cgroups</span> mekanizmalarıyla): her container kendi dosya sistemini, kendi process listesini, kendi network arayüzünü görür, ama aslında hepsi aynı çekirdek üzerinde çalışan sıradan process'lerdir. Bu yüzden bir container saniyeler içinde açılır, megabaytlarca yer kaplar.</p>
+      <div class="why docker">
+        <div class="tag hstack">// BU PROJEDE NEDEN ÖNEMLİ</div>
+        <p>3 node'lu cluster'ın her biri VirtualBox <b>sanal makinesi</b> (gerçek izolasyon, ayrı kernel &mdash; simüle edilmiş fiziksel sunucular). Onların içinde çalışan backend/frontend/postgres gibi uygulamalar ise <b>container</b> (aynı VM kernel'ini paylaşan hafif process'ler). İki farklı izolasyon seviyesi aynı anda var: VM'ler "farklı sunucular" gibi, container'lar o sunucular içindeki "hafif kutular" gibi.</p>
+      </div>
+    </section>
+
+    <section id="d-image" class="topic">
+      <h3>1.3 &mdash; Image ile container arasındaki fark</h3>
+      <p>Nesne yönelimli programlamadaki <b>sınıf / nesne</b> ayrımına benzer: <b>image</b> salt-okunur bir şablondur (sınıf); <b>container</b> o şablondan türetilmiş, çalışan, üzerine yazılabilir bir örnektir (nesne). Aynı image'dan istediğin kadar container başlatabilirsin, birbirini etkilemezler.</p>
+      <p>Image, üst üste binen <b>katmanlardan (layer)</b> oluşur. Her <span class="mono">Dockerfile</span> satırı (çoğunlukla) yeni bir katman üretir ve bu katmanlar diskte ayrı ayrı saklanır, birden fazla image aynı katmanı paylaşabilir. Bu hem disk alanından tasarruf sağlar hem de build'i hızlandırır: değişmeyen bir katman tekrar üretilmez, önbellekten (cache) kullanılır.</p>
+    </section>
+
+    <section id="d-dockerfile" class="topic">
+      <h3>1.4 &mdash; Dockerfile anatomisi (backend örneği)</h3>
+      <p>Projenin <span class="filepath">backend/Dockerfile</span> dosyası şu şekilde:</p>
+      <div class="code-panel">
+        <div class="cap">backend/Dockerfile</div>
+        <pre><span class="kw">FROM</span> mcr.microsoft.com/dotnet/sdk:10.0 <span class="kw">AS</span> build
+<span class="kw">WORKDIR</span> /src
+<span class="kw">COPY</span> WeatherProject.sln ./
+<span class="kw">COPY</span> src/.../*.csproj src/.../
+<span class="kw">RUN</span> dotnet restore ...
+
+<span class="kw">COPY</span> src/ src/
+<span class="kw">RUN</span> dotnet publish ... -o /app/publish
+
+<span class="kw">FROM</span> mcr.microsoft.com/dotnet/aspnet:10.0 <span class="kw">AS</span> runtime
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=build /app/publish .
+<span class="kw">ENV</span> ASPNETCORE_URLS=http://+:8080
+<span class="kw">EXPOSE</span> 8080
+<span class="kw">ENTRYPOINT</span> [<span class="str">"dotnet"</span>, <span class="str">"WeatherProject.Api.dll"</span>]</pre>
+      </div>
+      <table class="ref">
+        <tr><th>Komut</th><th>Ne yapar</th></tr>
+        <tr><td class="k">FROM</td><td>Başlangıç image'ı seçer &mdash; burada Microsoft'un resmi .NET SDK image'ı, üzerine kod eklenecek taban.</td></tr>
+        <tr><td class="k">WORKDIR</td><td>Container içinde çalışma dizinini belirler; sonraki komutlar bu dizine göre çalışır.</td></tr>
+        <tr><td class="k">COPY</td><td>Host'taki dosyayı image'ın içine kopyalar.</td></tr>
+        <tr><td class="k">RUN</td><td>Build sırasında bir kabuk komutu çalıştırır; sonucu yeni bir katman olarak image'a yazılır.</td></tr>
+        <tr><td class="k">ENV</td><td>Container her başladığında geçerli olacak ortam değişkeni tanımlar.</td></tr>
+        <tr><td class="k">EXPOSE</td><td>Container'ın hangi portu dinlediğini belgeler (belgeleme amaçlı; portu dışarı açmaz).</td></tr>
+        <tr><td class="k">ENTRYPOINT</td><td>Container başladığında fiilen çalışacak komut.</td></tr>
+      </table>
+    </section>
+
+    <section id="d-multistage" class="topic">
+      <h3>1.5 &mdash; Multi-stage build: neden iki <span class="mono">FROM</span> var</h3>
+      <p>Dockerfile'da <span class="mono">FROM</span> iki kere geçiyor: <span class="mono">AS build</span> ve <span class="mono">AS runtime</span>. Bu, <b>multi-stage build</b> deniyor. Mantık: kodu derlemek (build) için SDK gerekir (derleyici, paket yöneticisi, tüm araçlar &mdash; ~800MB+), ama derlenmiş uygulamayı <em>çalıştırmak</em> için sadece runtime yeterlidir (~200MB). SDK'yı production image'ına taşımak gereksiz yer kaplar ve saldırı yüzeyini büyütür (kullanılmayan derleyici araçları güvenlik açığı taşıyabilir).</p>
+      <p>Çözüm: ilk aşamada (<span class="mono">build</span>) SDK image'ı ile kodu derle, çıktıyı <span class="mono">/app/publish</span>'e yaz. İkinci aşamada (<span class="mono">runtime</span>) sıfırdan, sadece runtime içeren küçük bir image başlat ve <span class="mono">COPY --from=build</span> ile <em>sadece derlenmiş çıktıyı</em> içine kopyala. Build aşamasının image'ı en sonda atılır, sadece runtime aşaması gerçek image olarak kalır.</p>
+      <p>Aynı desen <span class="filepath">frontend/Dockerfile</span>'da da var: <span class="mono">node:24-alpine</span> ile Angular derlenir (<span class="mono">npm run build</span>), sonra sadece derlenmiş statik dosyalar <span class="mono">nginx:1.27-alpine</span> image'ına kopyalanır. Node.js'in kendisi (npm, derleyici) son image'a hiç girmez &mdash; sonuçta ortaya sadece nginx + statik HTML/CSS/JS kalır.</p>
+      <figure>
+        <svg viewBox="0 0 720 210" role="img" aria-label="Multi-stage build: build asamasi derler, runtime asamasi sadece cikti dosyasini alir, SDK atilir">
+          <defs>
+            <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g font-family="ui-sans-serif, sans-serif" font-size="12.5" fill="currentColor">
+            <rect x="20" y="30" width="220" height="110" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+            <text x="130" y="20" text-anchor="middle" font-weight="700">STAGE: build</text>
+            <text x="130" y="60" text-anchor="middle">dotnet SDK image</text>
+            <text x="130" y="80" text-anchor="middle" fill-opacity="0.65">(~800 MB, derleyici</text>
+            <text x="130" y="96" text-anchor="middle" fill-opacity="0.65">+ araçlar dahil)</text>
+            <rect x="60" y="106" width="140" height="24" rx="5" fill="currentColor" fill-opacity="0.12"/>
+            <text x="130" y="122" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11">/app/publish</text>
+
+            <line x1="240" y1="118" x2="330" y2="118" stroke="currentColor" marker-end="url(#arw)"/>
+            <text x="285" y="106" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11">COPY --from=build</text>
+
+            <rect x="330" y="30" width="220" height="110" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+            <text x="440" y="20" text-anchor="middle" font-weight="700">STAGE: runtime</text>
+            <text x="440" y="60" text-anchor="middle">aspnet runtime image</text>
+            <text x="440" y="80" text-anchor="middle" fill-opacity="0.65">(~200 MB, sadece</text>
+            <text x="440" y="96" text-anchor="middle" fill-opacity="0.65">calistirmaya yeter)</text>
+            <rect x="370" y="106" width="140" height="24" rx="5" fill="currentColor" fill-opacity="0.12"/>
+            <text x="440" y="122" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11">WeatherProject.Api.dll</text>
+
+            <text x="140" y="175" text-anchor="middle" fill-opacity="0.5">build stage: son image'a girmez, atilir</text>
+            <line x1="20" y1="188" x2="260" y2="188" stroke="currentColor" stroke-dasharray="3 4" stroke-opacity="0.35"/>
+
+            <text x="590" y="90" font-weight="700">docker push</text>
+            <text x="590" y="106" fill-opacity="0.65" font-size="11">edilen image</text>
+            <text x="590" y="122" fill-opacity="0.65" font-size="11">sadece bu</text>
+            <line x1="550" y1="85" x2="580" y2="85" stroke="currentColor" marker-end="url(#arw)"/>
+          </g>
+        </svg>
+        <figcaption>Build aşaması sadece derleme yapar ve atılır; nihai image sadece runtime aşamasından, içine kopyalanan bir dosyayla oluşur. Bu yüzden registry'ye push edilen image küçük ve temiz kalır.</figcaption>
+      </figure>
+    </section>
+
+    <section id="d-cache" class="topic">
+      <h3>1.6 &mdash; <span class="mono">.csproj</span> önce, kaynak kod sonra: layer cache sırası</h3>
+      <p>Dockerfile'da dikkat çekici bir sıra var: önce sadece <span class="mono">.csproj</span> dosyaları kopyalanıp <span class="mono">dotnet restore</span> çalıştırılıyor, <em>ondan sonra</em> tüm kaynak kod (<span class="mono">COPY src/ src/</span>) kopyalanıyor. Neden ayrı iki adım?</p>
+      <p>Docker, her katmanı önceki build'le karşılaştırır; girdi (kopyalanan dosyalar) değişmemişse o katmanı yeniden üretmez, cache'ten kullanır. NuGet paket restore işlemi (internet üzerinden indirme) yavaştır ama <span class="mono">.csproj</span> dosyaları (bağımlılık listesi) günde bir kaç kere değişir; asıl kaynak kod (<span class="mono">.cs</span> dosyaları) her commit'te değişir. Eğer tüm kodu tek seferde kopyalayıp restore etseydik, en ufak bir kod değişikliğinde <b>bağımlılıklar da yeniden indirilirdi</b>. Bu sırayla: kod değişse bile <span class="mono">.csproj</span> aynıysa restore adımı cache'ten gelir, sadece <span class="mono">dotnet publish</span> yeniden çalışır &mdash; build çok daha hızlanır.</p>
+    </section>
+
+    <section id="d-compose" class="topic">
+      <h3>1.7 &mdash; docker-compose: yerel geliştirme ortamı</h3>
+      <p><span class="mono">docker-compose</span>, birden fazla container'ı (backend, frontend, postgres, redis) <b>tek makinede</b>, tek komutla (<span class="mono">docker compose up</span>) ayağa kaldırmak için kullanılır. Kubernetes'in "mini, yerel" versiyonu gibi düşünülebilir &mdash; ama cluster yönetmez, sadece tek host üzerinde container'ları tanımlar.</p>
+      <div class="code-panel">
+        <div class="cap">docker-compose.yml (özet)</div>
+        <pre>postgres:
+  <span class="kw">healthcheck</span>: pg_isready ...
+backend:
+  <span class="kw">depends_on</span>:
+    postgres: { condition: service_healthy }
+    redis:    { condition: service_healthy }</pre>
+      </div>
+      <p><span class="mono">healthcheck</span>, container'ın "ayakta" olmasıyla "işe hazır" olması arasındaki farkı yakalar &mdash; postgres process'i başlamış olabilir ama henüz bağlantı kabul etmiyor olabilir. <span class="mono">depends_on: condition: service_healthy</span> sayesinde backend, postgres <em>gerçekten hazır olana kadar</em> beklenir; sadece process'in başlamasını değil, health check'in geçmesini bekler. Bu desen Kubernetes'teki <span class="mono">readinessProbe</span>'un doğrudan atası &mdash; aynı fikir, cluster seviyesinde tekrar karşımıza çıkacak.</p>
+    </section>
+
+    <section id="d-ca" class="topic">
+      <h3>1.8 &mdash; Projeye özel karar: kurumsal sertifika image içine gömülü</h3>
+      <div class="why docker">
+        <div class="tag hstack">// NEDEN BÖYLE YAPTIK</div>
+        <p>Şirket ağı tüm giden HTTPS trafiğini bir proxy'den (Websense/Forcepoint) geçirip kendi sertifikasıyla yeniden imzalıyor. Container'ın kendi güven deposu (trust store) host işletim sisteminden <b>tamamen izole</b> olduğu için, bu kurumsal kök sertifikayı (CA) ayrıca container'a tanıtmazsak, dış API çağrıları (örn. hava durumu servisine giden istek) sertifika doğrulama hatasıyla patlar.</p>
+        <p>Çözüm <span class="filepath">backend/Dockerfile</span> içinde: <span class="mono">COPY websense-root-ca.crt ...</span> + <span class="mono">RUN update-ca-certificates</span> &mdash; sertifika build sırasında image'ın güven deposuna kalıcı olarak eklenir. Sertifika dosyasının kendisi repoya commitlenmez (pipeline'da secret olarak enjekte edilir), ama image'a gömülme adımı Dockerfile'da açıkça belgelenir.</p>
+      </div>
+    </section>
+
+    <!-- ================= PART 2: KUBERNETES ================= -->
+    <div class="part-band k8s">
+      <span class="num hstack">BÖLÜM 2</span>
+      <h2>Kubernetes</h2>
+    </div>
+
+    <section id="k-problem" class="topic">
+      <h3>2.1 &mdash; docker-compose neden yetmiyor</h3>
+      <p><span class="mono">docker-compose</span> tek makinede çalışır. Bir sunucu çökerse üzerindeki her şey durur, kimse fark etmez, kimse yeniden başlatmaz. Trafik arttığında elle yeni container açman gerekir. Yeni bir versiyon deploy ederken container'ı durdurup yenisini başlatana kadar kısa bir kesinti olur. Birden fazla makineye (node'a) yayılan, kendi kendini onaran, trafiğe göre ölçeklenen bir sistem kurmak istediğinde compose'un yetmediği nokta burasıdır.</p>
+      <p>Kubernetes bunun cevabıdır: <b>"bana N adet backend container'ı hep ayakta tut"</b> dersin, Kubernetes bunu sürekli izler ve gerçek durumu istenen duruma getirir (reconciliation loop). Bir node çökerse, o node'daki pod'lar başka bir node'da otomatik yeniden başlar. Bu proje tam olarak bu yüzden 3 node'lu bir cluster'a geçti: <b>tek node = tek arıza noktası</b>, gerçek kurumsal ortamları simüle etmek için birden fazla node gerekiyordu.</p>
+    </section>
+
+    <section id="k-mimari" class="topic">
+      <h3>2.2 &mdash; Cluster mimarisi: Control Plane ve Node</h3>
+      <p>Bir Kubernetes cluster'ı iki tür makineden oluşur:</p>
+      <ul>
+        <li><b>Control Plane (bu projede <span class="mono">weather-server</span>):</b> cluster'ın "beyni". <span class="mono">API server</span> tüm komutların (<span class="mono">kubectl</span>) girdiği kapı; <span class="mono">scheduler</span> hangi pod'un hangi node'a yerleşeceğine karar verir; <span class="mono">controller-manager</span> "istenen durum" ile "gerçek durum" arasındaki farkı sürekli kapatır; <span class="mono">etcd</span> cluster'ın tüm durumunu tutan veritabanıdır.</li>
+        <li><b>Worker Node (bu projede <span class="mono">weather-node2</span>, <span class="mono">weather-node3</span>):</b> gerçek iş yükünün (pod'ların) çalıştığı makineler. Her node'da <span class="mono">kubelet</span> (o node'daki pod'ları yönetip control plane'e rapor eden ajan), <span class="mono">kube-proxy</span> (ağ yönlendirme kurallarını yazan bileşen) ve bir container çalıştırıcı (bu projede <span class="mono">containerd</span>, k3s'e gömülü) çalışır.</li>
+      </ul>
+      <p>Bu proje <b>k3s</b> kullanıyor &mdash; Kubernetes'in hafifletilmiş, tek binary'e sıkıştırılmış dağıtımı (Rancher Labs tarafından geliştirildi). Kavramsal olarak tam Kubernetes ile birebir aynı objeleri kullanır, sadece kurulumu ve kaynak tüketimi çok daha hafiftir; bu yüzden VirtualBox sanal makinelerinde rahatça çalışır.</p>
+    </section>
+
+    <section id="k-objeler" class="topic">
+      <h3>2.3 &mdash; Temel objeler (projeden gerçek örneklerle)</h3>
+      <table class="ref">
+        <tr><th>Obje</th><th>Ne işe yarar</th><th>Projede nerede</th></tr>
+        <tr><td class="k">Pod</td><td>Kubernetes'in en küçük çalıştırılabilir birimi; genelde tek bir container'ı sarar.</td><td>Her deployment/statefulset'in ürettiği çalışan birim</td></tr>
+        <tr><td class="k">Deployment</td><td>Durumsuz (stateless) uygulamalar için: replika sayısını korur, rolling update yapar, bir pod ölürse yenisini açar.</td><td class="filepath">04-backend.yaml, 05-frontend.yaml, redis, grafana, kibana</td></tr>
+        <tr><td class="k">StatefulSet</td><td>Durumlu (stateful) uygulamalar için: her replika sabit bir kimlik ve kendi kalıcı diskini korur.</td><td class="filepath">02-postgres.yaml, elasticsearch</td></tr>
+        <tr><td class="k">Service</td><td>Pod'lara sabit bir DNS adı ve iç IP verir; pod'lar yeniden başlasa/IP değişse bile Service adresi sabit kalır.</td><td>Her manifest'te (örn. <span class="mono">backend.weather-app.svc.cluster.local</span>)</td></tr>
+        <tr><td class="k">Ingress</td><td>Cluster dışından gelen HTTP trafiğini, host adına göre doğru Service'e yönlendirir.</td><td class="filepath">weather.127.0.0.1.nip.io, grafana..., kibana...</td></tr>
+        <tr><td class="k">ConfigMap / Secret</td><td>Ayarları ve gizli değerleri (şifre, bağlantı dizesi) image'dan bağımsız tutar.</td><td class="filepath">01-configmap.yaml, weather-secret</td></tr>
+        <tr><td class="k">PersistentVolumeClaim</td><td>Pod yeniden başlasa/silinse bile verinin kalıcı kalmasını sağlayan disk talebi.</td><td>postgres-data, es-data, registry-data</td></tr>
+        <tr><td class="k">DaemonSet</td><td>Her node'da tam olarak bir kopya çalıştırır &mdash; "her makinede olmalı" tipi ajanlar için.</td><td>filebeat (log toplayıcı), node-exporter (metrik toplayıcı)</td></tr>
+        <tr><td class="k">Namespace</td><td>Cluster içinde mantıksal bölme/izolasyon (isim çakışmasını önler, yetkilendirme sınırı çizer).</td><td>weather-app, logging, monitoring, registry</td></tr>
+      </table>
+    </section>
+
+    <section id="k-harita" class="topic">
+      <h3>2.4 &mdash; Projenin manifest haritası</h3>
+      <p>Repo içindeki <span class="filepath">k8s/</span> klasörü, cluster'ın "istenen durumunu" tanımlayan YAML dosyalarından oluşur. Numaralandırma bağımlılık sırasını yansıtır &mdash; namespace önce var olmalı, sonra config, sonra veritabanı, sonra onu kullanan uygulama:</p>
+      <div class="scroll-x">
+      <table class="ref">
+        <tr><th>Dosya</th><th>İçerik</th></tr>
+        <tr><td class="k">00-namespace.yaml</td><td>weather-app namespace'i oluşturur</td></tr>
+        <tr><td class="k">01-configmap / secret</td><td>DB adı, kullanıcı adı, Redis bağlantı adresi (config) ve DB şifresi (secret)</td></tr>
+        <tr><td class="k">02-postgres.yaml</td><td>StatefulSet + PVC + headless Service</td></tr>
+        <tr><td class="k">03-redis.yaml</td><td>Deployment + Service (kalıcı disk gerekmiyor, cache)</td></tr>
+        <tr><td class="k">04-backend.yaml</td><td>.NET API Deployment + Service</td></tr>
+        <tr><td class="k">05-frontend.yaml</td><td>Angular/nginx Deployment + Service + Ingress</td></tr>
+        <tr><td class="k">logging/*</td><td>Elasticsearch (StatefulSet) + Kibana (Deployment) + Filebeat (DaemonSet)</td></tr>
+        <tr><td class="k">monitoring/*</td><td>Prometheus, Grafana, node-exporter (DaemonSet), kube-state-metrics</td></tr>
+        <tr><td class="k">registry/*</td><td>Cluster içi private Docker registry (StatefulSet-benzeri Deployment + PVC + NodePort Service)</td></tr>
+      </table>
+      </div>
+      <p><span class="mono">kubectl apply -f dosya.yaml</span> komutu, YAML'da tanımlı "istenen durumu" cluster'a bildirir; Kubernetes farkı kendisi kapatır (yoksa oluşturur, varsa günceller). Bu <b>deklaratif</b> yaklaşımdır &mdash; "şunu yap" (imperative) yerine "durum böyle olsun" dersin.</p>
+    </section>
+
+    <section id="k-stateful" class="topic">
+      <h3>2.5 &mdash; Neden Postgres StatefulSet, Redis Deployment</h3>
+      <div class="why k8s">
+        <div class="tag hstack">// NEDEN BÖYLE YAPTIK</div>
+        <p><b>Postgres</b> ve <b>Elasticsearch</b> gerçek veri tutar; pod silinip yeniden oluşsa bile aynı diske (aynı veriye) bağlanması gerekir, ve birden fazla replikası olsaydı her birinin sabit, öngörülebilir bir kimliği (postgres-0, postgres-1 gibi) olması gerekirdi. Bu yüzden <b>StatefulSet</b>: her replikaya kendi <span class="mono">PersistentVolumeClaim</span>'ini otomatik bağlar, sıralı başlatır/durdurur.</p>
+        <p><b>Redis</b> ise bu projede sadece <em>geçici cache</em> &mdash; veri kaybolsa uygulama çalışmaya devam eder, sadece bir sonraki istekte tekrar dış API'ye gider. Kalıcı kimliğe ihtiyaç yok, bu yüzden sıradan <b>Deployment</b> yeterli ve daha basit.</p>
+      </div>
+    </section>
+
+    <section id="k-network" class="topic">
+      <h3>2.6 &mdash; Ağ: Service ve Ingress nasıl çalışır</h3>
+      <p>Her pod'un kendi IP'si vardır, ama bu IP <b>kararsızdır</b> &mdash; pod yeniden oluşturulduğunda değişir. <span class="mono">Service</span> bu soruna çözüm: sabit bir sanal IP (ClusterIP) ve DNS adı (<span class="mono">backend.weather-app.svc.cluster.local</span>) verir; arkasındaki pod'lar değişse de bu adres sabit kalır. Bunu her node üzerinde çalışan <span class="mono">kube-proxy</span>, iptables kurallarıyla gerçekleştirir: bu sanal IP'ye giden trafiği, o an canlı olan gerçek pod IP'lerinden birine yönlendirir.</p>
+      <p><span class="mono">Ingress</span> ise cluster dışından (tarayıcıdan) gelen HTTP trafiğinin giriş kapısıdır. Bu projede <span class="mono">Traefik</span> (k3s'e gömülü) bu görevi görüyor: <span class="mono">weather.127.0.0.1.nip.io</span> gibi bir host adına gelen isteği, <span class="mono">Host</span> header'ına bakarak doğru Service'e yönlendiriyor. <span class="mono">nip.io</span>, herhangi bir IP'yi domain adına gömüp otomatik çözen ücretsiz bir DNS hizmeti &mdash; gerçek bir domain almadan host-bazlı routing'i test etmeyi sağlıyor.</p>
+    </section>
+
+    <section id="k-rancher" class="topic">
+      <h3>2.7 &mdash; Rancher nedir</h3>
+      <p>Rancher, Kubernetes'in <b>kendisi değil</b>; onun üstüne oturan bir yönetim arayüzü. k3s zaten çalışan bir Kubernetes cluster'ı; Rancher, o cluster'ın içine (bir Deployment olarak) kurulup web üzerinden pod/node/namespace görüntüleme, kullanıcı yetkilendirme, çoklu-cluster yönetimi gibi işleri kolaylaştıran bir katman ekliyor. <span class="mono">kubectl</span> ile yapabileceğin her şeyi Rancher UI'dan da yapabilirsin &mdash; fark, komut satırı yerine görsel arayüz olması.</p>
+    </section>
+
+    <section id="k-olay" class="topic">
+      <h3>2.8 &mdash; Gerçek olay: tek node'dan 3 node'a geçiş neden her şeyi bozdu</h3>
+      <p>Bu, sunumda "neden böyle yaptın" sorusuna verilecek en güçlü, gerçek örnek. Başlangıçta tek node vardı; backend/frontend image'ları <span class="mono">docker build</span> ile üretilip <span class="mono">docker save | k3s ctr images import</span> komutuyla <b>doğrudan o node'un local containerd deposuna</b> aktarılıyordu. Registry yoktu &mdash; buna gerek de yoktu, çünkü pod hep aynı (tek) node'a zaten yerleşiyordu.</p>
+      <p>3 node'a geçince Kubernetes scheduler'ı pod'ları <em>herhangi bir</em> node'a yerleştirebilir hale geldi. Ama image hâlâ sadece ilk node'un local deposundaydı; deployment manifestinde <span class="mono">imagePullPolicy: Never</span> vardı (yani "asla dışarıdan indirme, sadece local'de ara"). Pod node2 veya node3'e düştüğünde image orada yoktu &rarr; <span class="mono">ErrImageNeverPull</span> / <span class="mono">ImagePullBackOff</span> hatası.</p>
+      <figure>
+        <svg viewBox="0 0 760 340" role="img" aria-label="Once: image sadece node1 de, node2/node3 e giden pod image bulamiyor. Sonra: private registry, her node oradan cekiyor">
+          <defs>
+            <marker id="arw2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g font-family="ui-sans-serif, sans-serif" font-size="12" fill="currentColor">
+            <text x="10" y="20" font-weight="700" font-size="13">ÖNCE &mdash; docker save | ctr import (tek node'a özel)</text>
+            <g transform="translate(0,34)">
+              <rect x="10" y="0" width="150" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="85" y="20" text-anchor="middle" font-weight="700">node1 (server)</text>
+              <text x="85" y="38" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5">image: mevcut ✓</text>
+
+              <rect x="220" y="0" width="150" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="295" y="20" text-anchor="middle" font-weight="700">node2</text>
+              <text x="295" y="38" text-anchor="middle" fill="var(--docker)" font-family="ui-monospace,monospace" font-size="10.5">image: yok ✗</text>
+
+              <rect x="430" y="0" width="150" height="50" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="505" y="20" text-anchor="middle" font-weight="700">node3</text>
+              <text x="505" y="38" text-anchor="middle" fill="var(--docker)" font-family="ui-monospace,monospace" font-size="10.5">image: yok ✗</text>
+
+              <line x1="640" y1="-10" x2="640" y2="60" stroke="currentColor" stroke-opacity="0.3"/>
+              <text x="650" y="10" font-size="11" fill-opacity="0.7">scheduler pod'u</text>
+              <text x="650" y="24" font-size="11" fill-opacity="0.7">herhangi birine</text>
+              <text x="650" y="38" font-size="11" fill-opacity="0.7">koyabilir</text>
+
+              <line x1="295" y1="50" x2="295" y2="80" stroke="var(--docker)" marker-end="url(#arw2)"/>
+              <text x="305" y="72" font-family="ui-monospace,monospace" font-size="10.5" fill="var(--docker)">ImagePullBackOff</text>
+            </g>
+
+            <line x1="10" y1="150" x2="750" y2="150" stroke="currentColor" stroke-opacity="0.2"/>
+
+            <text x="10" y="180" font-weight="700" font-size="13">SONRA &mdash; cluster içi private registry (TLS + trusted CA)</text>
+            <g transform="translate(0,194)">
+              <rect x="290" y="0" width="180" height="42" rx="6" fill="var(--k8s)" fill-opacity="0.18" stroke="var(--k8s)"/>
+              <text x="380" y="17" text-anchor="middle" font-weight="700">registry:5000</text>
+              <text x="380" y="33" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10">docker push burada</text>
+
+              <rect x="10" y="80" width="150" height="46" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="85" y="102" text-anchor="middle" font-weight="700">node1</text>
+              <text x="85" y="118" text-anchor="middle" fill="var(--k8s)" font-family="ui-monospace,monospace" font-size="10.5">pull ✓</text>
+
+              <rect x="295" y="80" width="150" height="46" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="370" y="102" text-anchor="middle" font-weight="700">node2</text>
+              <text x="370" y="118" text-anchor="middle" fill="var(--k8s)" font-family="ui-monospace,monospace" font-size="10.5">pull ✓</text>
+
+              <rect x="580" y="80" width="150" height="46" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+              <text x="655" y="102" text-anchor="middle" font-weight="700">node3</text>
+              <text x="655" y="118" text-anchor="middle" fill="var(--k8s)" font-family="ui-monospace,monospace" font-size="10.5">pull ✓</text>
+
+              <line x1="85" y1="80" x2="330" y2="42" stroke="var(--k8s)" marker-end="url(#arw2)"/>
+              <line x1="370" y1="80" x2="380" y2="42" stroke="var(--k8s)" marker-end="url(#arw2)"/>
+              <line x1="655" y1="80" x2="440" y2="42" stroke="var(--k8s)" marker-end="url(#arw2)"/>
+            </g>
+          </g>
+        </svg>
+        <figcaption>Önce: image tek node'un yerel deposunda hapis; scheduler pod'u başka bir node'a koyarsa image bulunamaz. Sonra: image cluster içi bir registry'ye push edilir, her node oradan (TLS üzerinden, kendi trust store'una eklenmiş self-signed sertifika ile) çekebilir &mdash; hangi node'a düşerse düşsün çalışır.</figcaption>
+      </figure>
+      <p>Çözüm için cluster içine bir <b>private Docker registry</b> kuruldu (<span class="filepath">k8s/registry/00-registry.yaml</span>): self-signed TLS sertifikalı, <span class="mono">NodePort 30500</span> üzerinden erişilebilir bir <span class="mono">registry:2</span> container'ı. Sertifika her 3 node'un güven deposuna (<span class="mono">update-ca-certificates</span>) eklendi, containerd'in <span class="mono">registries.yaml</span> dosyası bu registry'yi tanıyacak şekilde güncellendi. Pipeline artık <span class="mono">k3s ctr images import</span> yerine <span class="mono">docker push</span> yapıyor; deployment manifestlerinde <span class="mono">imagePullPolicy: Never</span> yerine <span class="mono">imagePullPolicy: Always</span> var. Sonuç: pod hangi node'a düşerse düşsün, image'ı registry'den çekebiliyor.</p>
+      <div class="warn-box">
+        <div class="tag hstack">// AYRICA BULUNAN GİZLİ SORUN</div>
+        <p>Registry çözümünü test ederken, backend/frontend deployment'larına daha önce elle eklenmiş bir <span class="mono">nodeSelector: kubernetes.io/hostname: weather-server</span> bulundu &mdash; muhtemelen orijinal kriz sırasında geçici bir "bant-yama" olarak eklenmiş, pod'ları hep image'ın bulunduğu tek node'a zorluyordu. Kalıcı çözüm (registry) devreye girdikten sonra bu artık gereksizdi ve kaldırıldı; pod'lar artık gerçekten herhangi bir node'a serbestçe yerleşebiliyor.</p>
+      </div>
+    </section>
+
+    <section id="k-pipeline" class="topic">
+      <h3>2.9 &mdash; "Nasıl oluşturdun?" &mdash; uçtan uca akış</h3>
+      <p>Bir kod değişikliğinin production'a ulaşma yolculuğu:</p>
+      <ol>
+        <li><b>Geliştirici</b> kodu değiştirir, <span class="mono">git push</span> yapar (Azure Repos'a).</li>
+        <li><b>Azure Pipelines</b> push'u yakalar, self-hosted agent'a (aynı zamanda cluster'ın master node'u &mdash; <span class="mono">weather-server</span>) işi atar.</li>
+        <li>Agent sırayla: <span class="mono">dotnet restore/build/test</span> (veya frontend için <span class="mono">npm ci/test/build</span>), sonra <span class="mono">docker build</span>.</li>
+        <li>Üretilen image, <span class="mono">docker tag</span> + <span class="mono">docker push</span> ile cluster içi registry'ye gönderilir.</li>
+        <li><span class="mono">kubectl rollout restart deployment ...</span> ile Kubernetes'e "yeni image'ı çek, pod'ları yenile" denir.</li>
+        <li>Kubernetes <b>rolling update</b> yapar: yeni pod'lar açılıp hazır olana kadar eskiler ayakta kalır &mdash; kesintisiz geçiş.</li>
+      </ol>
+      <p>Bu "pipeline as code" olarak <span class="filepath">azure-pipelines/backend.yml</span> ve <span class="filepath">frontend.yml</span> dosyalarında YAML olarak tanımlı ve repo ile birlikte versiyonlanıyor &mdash; pipeline'ın kendisi de kod gibi değişiklik geçmişine sahip.</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="qa" class="topic">
+      <h3>Sunumda çıkabilecek sorular &amp; kısa cevaplar</h3>
+
+      <div class="qa">
+        <div class="q hstack">Docker ile Kubernetes arasındaki fark ne?</div>
+        <div class="a">Docker tek makinede uygulamayı paketleyip çalıştırır. Kubernetes, bu paketlenmiş uygulamaları birden fazla makine üzerinde yönetir: yerleştirir, ölçekler, kendi kendini onarır. Docker "paket", Kubernetes "paket dağıtım ve işletim sistemi".</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">Neden tek node yerine 3 node?</div>
+        <div class="a">Gerçek kurumsal ortamı simüle etmek için: tek makine tek arıza noktasıdır (o makine çökerse her şey durur). 3 node'da bir node çökse bile Kubernetes pod'ları diğerlerine kaydırıp servisi ayakta tutar.</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">3 node'a geçince neden her şey bozuldu?</div>
+        <div class="a">Image sadece ilk node'un local deposundaydı, registry yoktu. Pod başka bir node'a yerleşince image'ı bulamadı. Cluster içi private registry kurup her node'un oradan image çekmesini sağlayarak kalıcı çözdük.</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">Postgres'i neden StatefulSet, backend'i neden Deployment yaptınız?</div>
+        <div class="a">Postgres kalıcı veri tutar, sabit kimlik ve sabit disk ister &mdash; StatefulSet bunun için var. Backend durumsuzdur (stateless), herhangi bir kopyası herhangi bir isteğe cevap verebilir &mdash; Deployment yeterli ve daha basit.</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">Multi-stage build'in faydası ne?</div>
+        <div class="a">Derleme araçları (SDK, npm) production image'ına girmez; sadece derlenmiş çıktı girer. Image küçülür, gereksiz araçlar taşınmaz, saldırı yüzeyi azalır.</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">Rancher olmadan olmaz mıydı?</div>
+        <div class="a">Olurdu &mdash; Rancher, k3s'in (yani Kubernetes'in) üstüne kurulan isteğe bağlı bir yönetim arayüzü. Cluster'ın kendisi Rancher'a bağımlı değil, kubectl ile her şey zaten yapılabiliyor. Rancher görsel takip ve yönetimi kolaylaştırıyor.</div>
+      </div>
+      <div class="qa">
+        <div class="q hstack">Prometheus ile Grafana'nın rolü ne, neden ikisi de var?</div>
+        <div class="a">Prometheus metrikleri toplayıp saklayan taraf (node-exporter, kube-state-metrics, backend'in kendi /metrics endpoint'inden periyodik çekim yapar). Grafana ise sadece görselleştirir, kendisi hiç metrik toplamaz &mdash; Prometheus'a sorgu atıp sonucu dashboard'da gösterir.</div>
+      </div>
+    </section>
+
+  </main>
+</div>

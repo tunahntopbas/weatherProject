@@ -1,5 +1,10 @@
 namespace WeatherProject.Domain.Entities;
 
+// Domain katmani - anlik hava durumu bilgisini temsil eden saf is nesnesi.
+// Disari bagimliligi yok (EF Core, HTTP client vs. yok), bu yuzden Application
+// ve Infrastructure ne kullanirsa kullansin bu sinif degismeden kalir.
+// Immutable yapildi (setter yok, hepsi constructor'da set ediliyor) cunku bir
+// forecast olusturulduktan sonra degismemeli - yeni sorgu = yeni nesne.
 public class WeatherForecast
 {
     public string CityName { get; }
@@ -23,6 +28,8 @@ public class WeatherForecast
         double humidityPercent = 0,
         IReadOnlyList<DailyForecast>? daily = null)
     {
+        // sehir adi bos gelirse daha asagida (cache key, DB kaydi vs.) anlamsiz
+        // hatalarla ugrasmak yerine burada erken patlat
         if (string.IsNullOrWhiteSpace(cityName))
             throw new ArgumentException("City name cannot be empty.", nameof(cityName));
 

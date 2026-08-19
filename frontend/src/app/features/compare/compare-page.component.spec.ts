@@ -4,6 +4,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { ComparePageComponent } from './compare-page.component';
 import { environment } from '../../../environments/environment';
 
+// sahte HTTP cevaplariyla birden fazla sehir eklenince slot'larin dogru
+// doldugunu, basarisiz cagrida "failed" durumunun isaretlendigini test ediyor
 describe('ComparePageComponent', () => {
   let fixture: ComponentFixture<ComparePageComponent>;
   let component: ComparePageComponent;

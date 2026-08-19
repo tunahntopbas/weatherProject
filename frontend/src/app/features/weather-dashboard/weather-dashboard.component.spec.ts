@@ -9,6 +9,8 @@ import { environment } from '../../../environments/environment';
 import { SelectedCityService } from '../../core/services/selected-city.service';
 import { WeatherThemeStateService } from '../../core/services/weather-theme-state.service';
 
+// HttpTestingController ile gercek backend'e gitmeden sahte HTTP cevaplari
+// veriliyor, sehir secildiginde forecast/hata durumlarinin dogru yansidigi test ediliyor
 describe('WeatherDashboardComponent', () => {
   let fixture: ComponentFixture<WeatherDashboardComponent>;
   let component: WeatherDashboardComponent;

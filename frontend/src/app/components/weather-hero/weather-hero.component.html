@@ -3,6 +3,8 @@
   <div class="hero__city-row">
     <p class="hero__city">{{ forecast().cityName }}</p>
     <app-province-badge [cityName]="forecast().cityName" />
+    <!-- ikon ve aria-label ayni isFavorite() durumundan turetiliyor, ikisi hep
+         senkron - dolu kalp/bos kalp arasi degisim + ekran okuyucuya dogru etiket -->
     <button
       type="button"
       class="hero__favorite"

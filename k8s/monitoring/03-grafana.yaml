@@ -1,3 +1,7 @@
+# dashboard'lar ve datasource baglantisi elle Grafana arayuzunden degil,
+# "provisioning" ile (asagidaki 3 configMap) otomatik yukleniyor - pod her
+# yeniden olustugunda dashboard'lar kaybolmaz, hep k8s/monitoring/04-grafana-
+# provisioning.yaml'daki tanimdan gelir (bkz. o dosya)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,6 +25,23 @@ spec:
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
               value: "changeme"
+          volumeMounts:
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboard-weatherapp
+              mountPath: /var/lib/grafana/dashboards
+      volumes:
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dashboard-weatherapp
+          configMap:
+            name: grafana-dashboard-weatherapp
 ---
 apiVersion: v1
 kind: Service
@@ -43,6 +64,16 @@ spec:
   ingressClassName: traefik
   rules:
     - host: grafana.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+    - host: grafana.192.168.56.11.nip.io
       http:
         paths:
           - path: /

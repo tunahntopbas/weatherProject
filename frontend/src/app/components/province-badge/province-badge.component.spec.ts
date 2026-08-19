@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProvinceBadgeComponent } from './province-badge.component';
 
+// bilinen/bilinmeyen sehir isimlerinde dogru plaka kodunun (veya "--") cikip cikmadigi test ediliyor
 describe('ProvinceBadgeComponent', () => {
   let fixture: ComponentFixture<ProvinceBadgeComponent>;
 

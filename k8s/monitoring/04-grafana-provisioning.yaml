@@ -1,0 +1,135 @@
+# bu dosyadaki 3 ConfigMap, Grafana'ya elle "Add datasource" / "Import dashboard"
+# yapmak yerine her seyi otomatik (provisioning) yukletmek icin - 03-grafana.yaml'da
+# bu ConfigMap'ler pod'a volume olarak mount ediliyor. Pod yeniden olustugunda
+# dashboard kaybolmaz, hep buradaki tanimdan gelir.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  # Grafana acilista bu dosyayi okuyup Prometheus'u varsayilan datasource
+  # olarak otomatik ekliyor - elle "Add data source" tiklamaya gerek yok
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+        editable: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: monitoring
+data:
+  # asagidaki dashboard json'unun nereden okunacagini soyluyor (path), Grafana
+  # bu klasoru 30 saniyede bir tarayip yeni/degisen dashboard var mi kontrol ediyor
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: weather-app
+        orgId: 1
+        folder: WeatherProject
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards
+---
+# dikkat: asagisi duz JSON, Grafana'nin kendi dashboard export formati - JSON
+# yorum satiri desteklemedigi icin buraya # veya // ile yorum eklenemez,
+# eklenirse Grafana dashboard'u parse edemez ve hic yuklenmez
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-weatherapp
+  namespace: monitoring
+data:
+  weatherapp-overview.json: |
+    {
+      "title": "WeatherProject - Cluster & App Overview",
+      "uid": "weatherapp-overview",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "time": { "from": "now-30m", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Servis Durumu (Up/Down)",
+          "type": "table",
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "up", "format": "table", "instant": true, "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ]
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "Node CPU Kullanimi (%)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": "{{instance}}", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } }
+        },
+        {
+          "id": 3,
+          "title": "Node Memory Kullanimi (%)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "legendFormat": "{{instance}}", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } }
+        },
+        {
+          "id": 4,
+          "title": "Backend HTTP Istek Orani (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "sum(rate(http_request_duration_seconds_count[1m])) by (controller, action, code)", "legendFormat": "{{controller}}.{{action}} [{{code}}]", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "reqps" } }
+        },
+        {
+          "id": 5,
+          "title": "Backend p95 Latency",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "id": 6,
+          "title": "Backend 5xx Hata Orani",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "sum(rate(http_request_duration_seconds_count{code=~\"5..\"}[5m]))", "legendFormat": "5xx errors/s", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "reqps" } }
+        }
+      ]
+    }

@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { FavoritesService } from './favorites.service';
 
+// gercek tarayici localStorage'i kullaniliyor (mock degil) - her testten once
+// temizlenip testlerin birbirinin verisini gormemesi saglaniyor
 describe('FavoritesService', () => {
   beforeEach(() => {
     localStorage.clear();

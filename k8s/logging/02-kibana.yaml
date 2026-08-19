@@ -1,3 +1,7 @@
+# Elasticsearch'teki loglari arayip gorsellestirdigimiz arayuz. Kibana kendisi
+# veri tutmuyor, sadece Elasticsearch'e sorgu atiyor - ELASTICSEARCH_HOSTS
+# k8s'in kendi DNS'i uzerinden servis adiyla (elasticsearch) baglaniyor,
+# IP hardcode edilmiyor.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,6 +38,10 @@ spec:
     - port: 5601
       targetPort: 5601
 ---
+# dikkat: burada tls tanimli degil, sadece http dinliyor. Tarayicidan girerken
+# https:// yazilirsa (veya tarayici otomatik yukseltirse) Traefik'in varsayilan
+# self-signed sertifikasina dusup "guvenli degil" uyarisi verir - dogru link
+# her zaman http:// ile baslamali
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -43,6 +51,16 @@ spec:
   ingressClassName: traefik
   rules:
     - host: kibana.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
+    - host: kibana.192.168.56.11.nip.io
       http:
         paths:
           - path: /

@@ -1,3 +1,6 @@
+# iki port ayni container'a gidiyor, sadece disaridan cagirirken hangi ismi
+# kullanacagimiza gore secim - 5000 eski/aliskanlik portu, 8080 container'in
+# kendi native portu (Dockerfile'daki EXPOSE 8080 ile ayni)
 apiVersion: v1
 kind: Service
 metadata:
@@ -31,8 +34,13 @@ spec:
     spec:
       containers:
         - name: backend
-          image: weather-backend:local
-          imagePullPolicy: Never
+          # onceden weather-backend:local + imagePullPolicy: Never idi - tek node'da
+          # calisiyordu cunku image sadece o node'un local containerd deposundaydi.
+          # 3 node'a gecince pod baska bir node'a dusunce image bulunamiyordu
+          # (ErrImageNeverPull). Cozum: cluster ici private registry (k8s/registry/)
+          # kuruldu, pipeline artik oraya push ediyor, her node oradan cekebiliyor.
+          image: 192.168.56.11:30500/weather-backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:

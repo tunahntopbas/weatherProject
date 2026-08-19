@@ -7,6 +7,10 @@ using WeatherProject.Domain.Entities;
 
 namespace WeatherProject.Infrastructure.ExternalApis;
 
+// IWeatherProvider'in gercek implementasyonu - Open-Meteo API'sini kullaniyor.
+// Ucretsiz, API key istemiyor, bu yuzden secildi. Iki ayri HTTP cagrisi var:
+// once GeocodeAsync ile sehir adindan koordinat buluyoruz, sonra o koordinatla
+// forecast cekiyoruz - Open-Meteo boyle calisiyor (dogrudan sehir adiyla sorgu yok).
 public class OpenMeteoProvider : IWeatherProvider
 {
     // WMO weather interpretation codes: https://open-meteo.com/en/docs
@@ -35,6 +39,9 @@ public class OpenMeteoProvider : IWeatherProvider
         [99] = "thunderstorm with heavy hail",
     };
 
+    // Open-Meteo'nun geocoding'i bazen Turkce karakterli sehir adlarinda ("Kirikkale"
+    // yerine "Kırıkkale" gibi) sonuc bulamiyor. Once orijinal isimle deneniyor,
+    // bulunamazsa ASCII'ye cevrilip tekrar deneniyor (TryGeocodeAsync icinde)
     private static readonly Dictionary<char, char> TurkishToAsciiMap = new()
     {
         ['İ'] = 'I', ['ı'] = 'i', ['Ğ'] = 'G', ['ğ'] = 'g',
@@ -53,6 +60,7 @@ public class OpenMeteoProvider : IWeatherProvider
 
     public async Task<WeatherForecast> GetCurrentWeatherAsync(string cityName, CancellationToken cancellationToken)
     {
+        // once koordinat lazim, Open-Meteo forecast endpoint'i sehir adi kabul etmiyor
         var (latitude, longitude) = await GeocodeAsync(cityName, cancellationToken);
 
         var forecastUri =
@@ -102,6 +110,9 @@ public class OpenMeteoProvider : IWeatherProvider
 
     private async Task<(double Latitude, double Longitude)> GeocodeAsync(string cityName, CancellationToken cancellationToken)
     {
+        // 81 il icin koordinatlar zaten elimizde (TurkishProvinceCoordinates) -
+        // once ona bak, tutarsa disariya hic istek atmadan donduruyoruz. Boylece
+        // Turkiye'deki il aramalarinin cogu geocoding cagrisina hic ihtiyac duymuyor.
         if (TurkishProvinceCoordinates.ByName.TryGetValue(cityName, out var knownCoordinates))
             return knownCoordinates;
 

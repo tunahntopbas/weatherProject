@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AnimatedBackgroundComponent } from './animated-background.component';
 import { WeatherTheme } from '../../core/services/weather-theme.service';
 
+// theme input'u degisince dogru particle/foto/renk uygulaniyor mu diye kontrol
 describe('AnimatedBackgroundComponent', () => {
   let fixture: ComponentFixture<AnimatedBackgroundComponent>;
 

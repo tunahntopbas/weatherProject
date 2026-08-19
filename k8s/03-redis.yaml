@@ -10,6 +10,9 @@ spec:
     - port: 6379
       targetPort: 6379
 ---
+# Postgres'in aksine Deployment kullanildi: Redis burada sadece gecici cache
+# (bkz. RedisWeatherCacheRepository), veri kaybolsa da sorun degil - kalici
+# disk/StatefulSet gerektiren bir durum yok
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,3 +1,6 @@
+// il -> plaka kodu eslemesi (province-badge component'inde kullaniliyor,
+// sehir kartinin yaninda "34" gibi plaka rozeti gostermek icin) - backend'den
+// gelmiyor, tamamen sabit/istemci tarafi veri
 export const PLATE_CODE_BY_PROVINCE: Readonly<Record<string, string>> = {
   Adana: '01', Adıyaman: '02', Afyonkarahisar: '03', Ağrı: '04', Amasya: '05',
   Ankara: '06', Antalya: '07', Artvin: '08', Aydın: '09', Balıkesir: '10',

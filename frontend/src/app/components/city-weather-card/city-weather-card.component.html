@@ -1,6 +1,8 @@
 <button type="button" class="city-card" (click)="onClick()">
   <app-province-badge [cityName]="summary().cityName" />
   <span class="city-card__name">{{ summary().cityName }}</span>
+  <!-- coklu sehir istekleri paralel gidiyor (bkz. multi-city-weather.service),
+       biri basarisiz olursa sadece o kart hata gosterir, digerleri etkilenmez -->
   @if (summary().failed) {
     <span class="city-card__failed">Yuklenemedi</span>
   } @else {

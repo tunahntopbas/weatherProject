@@ -5,6 +5,9 @@ using Xunit;
 
 namespace WeatherProject.Infrastructure.Tests;
 
+// Gercek Open-Meteo API'sine gitmek yerine FakeHttpMessageHandler ile sahte
+// HTTP cevaplari donduruyoruz (asagidaki JSON sabitler) - testler internete
+// bagimli olmasin, kurumsal agdan API engellense bile testler yesil kalsin diye.
 public class OpenMeteoProviderTests
 {
     private const string GeocodingResponseJson = """

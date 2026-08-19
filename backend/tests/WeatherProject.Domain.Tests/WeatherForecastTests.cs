@@ -3,6 +3,8 @@ using Xunit;
 
 namespace WeatherProject.Domain.Tests;
 
+// Domain katmaninin disari bagimliligi olmadigi icin bu testler de sade:
+// hicbir mock/HTTP/DB yok, sadece constructor validasyonunu kontrol ediyor.
 public class WeatherForecastTests
 {
     [Fact]

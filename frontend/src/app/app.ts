@@ -17,5 +17,7 @@ export class App {
   // Read-only from the shell's perspective: WeatherDashboardComponent (currently the only
   // page that derives a real theme from live forecast data) writes into this service; the
   // shell just renders whatever it currently holds so the background persists across routes.
+  // sayfa degistirince arka plan animasyonu sifirlanmasin diye state buradan degil,
+  // paylasilan servisten okunuyor - route degisince component yeniden kurulsa bile tema kalir
   readonly theme = this.weatherThemeStateService.theme;
 }

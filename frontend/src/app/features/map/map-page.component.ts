@@ -7,6 +7,8 @@ import { WeatherService } from '../../core/services/weather.service';
 import { SelectedCityService } from '../../core/services/selected-city.service';
 import { ProvinceBadgeComponent } from '../../components/province-badge/province-badge.component';
 
+// SVG haritada il olmayan ama data-name'i olan bolgeler var (Kibris) -
+// tiklaninca hava durumu sorgusu atmasin diye disarida tutuluyor
 const NON_PROVINCE_NAMES = new Set(['North Cyprus', 'South Cyprus']);
 
 @Component({
@@ -35,13 +37,24 @@ export class MapPageComponent implements AfterViewInit {
   readonly activeTemp = signal<number | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
+  // harita bir img degil, ham SVG dosyasi metin olarak cekilip [innerHTML] ile
+  // sayfaya gomuluyor - boylece her il bir <g data-name="..."> grubu olarak
+  // DOM'da gercekten var oluyor ve tiklanabiliyor/renklendirilebiliyor
   ngAfterViewInit(): void {
     this.http.get('/images/turkey-provinces.svg', { responseType: 'text' }).subscribe((svg) => {
+      // bypassSecurityTrustHtml gerekli, yoksa Angular guvenlik icin SVG
+      // iceriginin cogunu sessizce siler - dosya kendi projemizden geldigi
+      // (kullanici girisi olmadigi) icin güvenli
       this.svgMarkup.set(this.sanitizer.bypassSecurityTrustHtml(svg));
+      // queueMicrotask: [innerHTML] ile DOM'a yazma islemi bitmeden click
+      // handler eklenmeye calisilirsa host henuz bos olabilir, bir sonraki
+      // microtask'a birakip DOM'un gerçekten guncellenmesini garantiliyoruz
       queueMicrotask(() => this.attachClickHandler());
     });
   }
 
+  // aktif ildeki sicakligi gordukten sonra "ana sayfada gor" butonuyla o ile
+  // gecis yapmayi sagliyor
   viewOnDashboard(): void {
     const city = this.activeCity();
     if (!city) return;
@@ -49,6 +62,9 @@ export class MapPageComponent implements AfterViewInit {
     this.router.navigate(['/']);
   }
 
+  // tek bir click listener tum harita konteynerine ekleniyor (event delegation) -
+  // 81 ilin her biri icin ayri ayri listener eklemek yerine, tiklanan noktanin
+  // en yakin data-name'li grubunu closest() ile buluyoruz
   private attachClickHandler(): void {
     const host = this.mapHost()?.nativeElement;
     if (!host) return;
@@ -60,11 +76,16 @@ export class MapPageComponent implements AfterViewInit {
       const rawName = target.getAttribute('data-name') ?? '';
       if (NON_PROVINCE_NAMES.has(rawName)) return;
 
+      // SVG'de Istanbul'un data-name'i bazen ek bilgiyle geliyor (adalar vs.),
+      // hepsini tek "İstanbul" ismine indirgiyoruz
       const cityName = rawName.startsWith('İstanbul') ? 'İstanbul' : rawName;
       this.selectProvince(cityName, target);
     });
   }
 
+  // bir ile tiklaninca hava durumu cekiliyor, gelince o ilin SVG grubu sicakliga
+  // gore renklendiriliyor (asagida colorProvince). Kullanici hizli hizli farkli
+  // illere tiklarsa eski istekler "stale" sayilip yok sayiliyor (asagidaki kontrol)
   private selectProvince(cityName: string, groupEl: Element): void {
     this.errorMessage.set(null);
     this.activeCity.set(cityName);
@@ -84,6 +105,9 @@ export class MapPageComponent implements AfterViewInit {
   }
 
   private colorProvince(groupEl: Element, tempCelsius: number): void {
+    // -10 derece ile +30 derece arasini 0-1 araligina yayip soguktan sicaga
+    // renk gecisi yapiyoruz (asagida color-mix ile) - araligin disina tasarsa
+    // clamp (Math.min/max) ile 0 veya 1'de sabitleniyor
     const ratio = Math.min(Math.max((tempCelsius + 10) / 40, 0), 1);
     const color = `color-mix(in srgb, var(--cold) ${(1 - ratio) * 100}%, var(--warm) ${ratio * 100}%)`;
     // `var()`/`color-mix()` only resolve through real CSS (an inline `style` property or a

@@ -10,6 +10,9 @@ const DEFAULT_THEME = resolveWeatherTheme(2, true);
  * page computes it (currently only WeatherDashboardComponent, via its forecast()) and the
  * shell (App), which renders the single, route-persistent <app-animated-background> layer.
  */
+// kisacasi: dashboard hava durumunu cekince temayi burada guncelliyor, app.ts
+// da bu signal'i okuyup arka plani gunceliyor - iki component birbirini
+// dogrudan bilmiyor, aradaki kopruyu bu servis kuruyor
 @Injectable({ providedIn: 'root' })
 export class WeatherThemeStateService {
   readonly theme = signal<WeatherTheme>(DEFAULT_THEME);

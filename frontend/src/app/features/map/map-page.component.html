@@ -6,6 +6,8 @@
   </header>
 
   <div class="map-page__body">
+    <!-- gercek harita buraya component.ts'deki svgMarkup() ile ham SVG olarak
+         basiliyor, click handler'i da yine component.ts'te (attachClickHandler) -->
     <div class="map-page__host" #mapHost [innerHTML]="svgMarkup()"></div>
 
     @if (activeCity(); as city) {

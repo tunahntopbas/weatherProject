@@ -1,3 +1,6 @@
+# metrik toplama (Prometheus) ve gorsellestirme (Grafana) burada - loglama'dan
+# (k8s/logging) ayri: biri metrik/sayisal veri, digeri metin log, ikisi de
+# ayri arac seti kullaniyor ama ayni amaca (gozlemlenebilirlik) hizmet ediyor
 apiVersion: v1
 kind: Namespace
 metadata:

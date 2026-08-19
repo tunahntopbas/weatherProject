@@ -7,6 +7,9 @@ namespace WeatherProject.Infrastructure.Tests;
 
 public class SearchHistoryRepositoryTests
 {
+    // gercek Postgres yerine EF Core'un in-memory saglayicisi kullaniliyor.
+    // Guid.NewGuid() ile her test kendi izole "veritabanini" aliyor,
+    // testler birbirinin verisini gormesin diye.
     private static WeatherDbContext CreateInMemoryContext()
     {
         var options = new DbContextOptionsBuilder<WeatherDbContext>()

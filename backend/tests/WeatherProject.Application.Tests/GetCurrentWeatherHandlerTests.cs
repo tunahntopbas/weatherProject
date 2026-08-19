@@ -6,6 +6,9 @@ using Xunit;
 
 namespace WeatherProject.Application.Tests;
 
+// Cache-aside mantigini kanitlayan testler: cache doluysa provider'a hic
+// gidilmemeli, bossa gidilip cache doldurulmali. Ikisi de mock (Moq) uzerinden -
+// gercek Redis/HTTP yok, sadece HandleAsync'in karar mantigi test ediliyor.
 public class GetCurrentWeatherHandlerTests
 {
     [Fact]

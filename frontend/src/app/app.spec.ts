@@ -5,6 +5,8 @@ import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
 
+// shell'in (sidebar, top bar, arka plan) dogru render oldugunu ve route
+// degisince arka plan animasyonunun yeniden kurulmadigini (tek instance kaldigini) test eder
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({

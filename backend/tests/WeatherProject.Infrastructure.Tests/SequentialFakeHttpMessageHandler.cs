@@ -2,6 +2,9 @@ using System.Net;
 
 namespace WeatherProject.Infrastructure.Tests;
 
+// FakeHttpMessageHandler'dan farki: tek cevap degil, sirali bir kuyruk donduruyor.
+// OpenMeteoProvider iki ayri cagri yapiyor (geocode + forecast), bu handler
+// o iki cagriya farkli cevaplar vermek gerektiginde kullaniliyor.
 public class SequentialFakeHttpMessageHandler : HttpMessageHandler
 {
     private readonly Queue<(HttpStatusCode StatusCode, string ResponseBody)> _responses;

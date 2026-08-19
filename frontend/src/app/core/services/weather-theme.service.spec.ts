@@ -1,5 +1,7 @@
 import { resolveWeatherTheme, weatherCategoryFromCode, WEATHER_CATEGORY_ICON } from './weather-theme.service';
 
+// weather code -> kategori -> tema eslemesinin dogru calistigini, ozellikle
+// clear/gunduz-gece ayrimi gibi ozel durumlari kontrol eder
 describe('resolveWeatherTheme', () => {
   it('maps clear-sky code (0) with isDay true to clear/day/sun-rays', () => {
     const theme = resolveWeatherTheme(0, true);

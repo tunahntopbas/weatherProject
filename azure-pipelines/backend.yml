@@ -1,3 +1,6 @@
+# sadece backend/ altinda degisiklik oldugunda tetiklenir - frontend'e dokunan
+# bir push bu pipeline'i gereksiz yere calistirmaz (frontend.yml ayri, kendi
+# path filtresiyle)
 trigger:
   branches:
     include:
@@ -8,6 +11,9 @@ trigger:
 
 pr: none
 
+# self-hosted agent zorunlu: deploy hedefi (k3s, kubectl, docker) sadece bu
+# makineden (weather-server) erisilebilir, Microsoft'un genel bulut agent'lari
+# oraya ulasamaz
 pool:
   name: Default
 
@@ -36,11 +42,20 @@ jobs:
       - script: docker build -t weatherproject-backend:latest ./backend
         displayName: Build Docker image
 
+      # onceden "docker save | k3s ctr images import" ile image dogrudan agent'in
+      # kendi node'unun local containerd deposuna atiliyordu - tek node'da sorun
+      # yoktu ama 3 node'a gecince pod baska bir node'a dusunce image bulunamadi.
+      # Simdi cluster ici registry'ye (k8s/registry/) push ediliyor, hangi node'a
+      # dusersen dus oradan cekebiliyorsun.
       - script: |
-          docker tag weatherproject-backend:latest weather-backend:local
-          docker save weather-backend:local | sudo k3s ctr images import -
-        displayName: Import image into k3s containerd
+          docker tag weatherproject-backend:latest 192.168.56.11:30500/weather-backend:latest
+          docker push 192.168.56.11:30500/weather-backend:latest
+        displayName: Push image to cluster registry
 
+      # imagePullPolicy: Always oldugu icin ayni tag (latest) rollout restart'ta
+      # yeniden cekilir. rollout status ise yeni pod gercekten hazir olana kadar
+      # pipeline'i bekletir - bekletmezsek "deploy basarili" desek de pod hala
+      # ayaga kalkmiyor olabilirdi
       - script: |
           kubectl rollout restart deployment backend -n weather-app
           kubectl rollout status deployment backend -n weather-app --timeout=120s

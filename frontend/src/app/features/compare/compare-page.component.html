@@ -5,6 +5,8 @@
     <p class="page-masthead__hint">En fazla 3 il ekleyip anlik durumlarini karsilastirin.</p>
   </header>
 
+  <!-- 3 sehir dolunca arama kutusu tamamen gizleniyor (component.ts'deki
+       MAX_COMPARE_CITIES ile ayni sinir, burada sabit sayi olarak tekrarlandi) -->
   @if (slots().length < 3) {
     <div class="compare-page__search">
       <app-city-autocomplete (citySelected)="addCity($event)" />

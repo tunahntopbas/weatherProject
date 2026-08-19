@@ -1,3 +1,5 @@
+# uygulamanin tum parcalari (backend, frontend, db, redis) bu namespace altinda
+# toplaniyor - loglama ve monitoring ayri namespace'lerde (k8s/logging, k8s/monitoring)
 apiVersion: v1
 kind: Namespace
 metadata:

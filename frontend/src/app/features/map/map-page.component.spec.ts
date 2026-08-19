@@ -7,6 +7,8 @@ import { MapPageComponent } from './map-page.component';
 import { SelectedCityService } from '../../core/services/selected-city.service';
 import { environment } from '../../../environments/environment';
 
+// gercek buyuk SVG dosyasi yerine kucuk sahte bir harita (tek il: Ankara) ile
+// tiklama/hava durumu/renklendirme akisini test ediyor
 describe('MapPageComponent', () => {
   let fixture: ComponentFixture<MapPageComponent>;
   let httpMock: HttpTestingController;

@@ -1,7 +1,6 @@
 using System.Net.Security;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using WeatherProject.Application.Interfaces;
@@ -12,6 +11,8 @@ using WeatherProject.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// asagidaki tum servis kayitlari (DI) burada toplu yapiliyor, .NET'in
+// minimal hosting modeli boyle - ayri bir Startup.cs yok
 builder.Services.AddControllers();
 
 builder.Services.Configure<OpenMeteoOptions>(
@@ -47,6 +48,10 @@ builder.Services.AddScoped<GetCurrentWeatherHandler>();
 
 var app = builder.Build();
 
+// container her ayaga kalktiginda pending migration'lari otomatik uygula -
+// ayri bir migration adimi/pipeline stage'i yok, uygulama kendi DB semasini
+// kendi guncelliyor. Test ortaminda (WebApplicationFactory) gercek DB olmadigi
+// icin bu blok testlerde atlanir.
 if (!app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
@@ -56,22 +61,27 @@ if (!app.Environment.IsEnvironment("Testing"))
 
 app.UseHttpMetrics();
 
-// UseHttpMetrics'ten SONRA kayitli olmali: prometheus-net'in metrik ortasi
-// (finally blogu) response.StatusCode'u burada zaten 500'e cekilmis halde
-// okusun diye. Once kayitli olsaydi exception, metrik ortasindan gectikten
-// sonra yakalanir ve istekler yanlislikla code=200 olarak sayilirdi.
-app.UseExceptionHandler(exceptionHandlerApp =>
+// UseExceptionHandler yerine duz try/catch middleware kullanilir: prometheus-net'in
+// UseHttpMetrics'i, ASP.NET Core'un UseExceptionHandler'inin re-execution mekanizmasini
+// (response'u sifirlayip yeniden calistirmasi) dogru izleyemiyor ve istekler yanlislikla
+// code=200 (bazen 404) olarak sayiliyor - bilinen kutuphane sorunu
+// (prometheus-net/prometheus-net#354). Duz middleware'de StatusCode next() donmeden once
+// normal sekilde set edildigi icin metrik dogru okunur.
+app.Use(async (context, next) =>
 {
-    exceptionHandlerApp.Run(async context =>
+    try
     {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        await next();
+    }
+    catch (Exception exception)
+    {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         logger.LogError(exception, "Unhandled exception while processing {Path}", context.Request.Path);
 
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsJsonAsync(new { error = "Beklenmeyen bir hata olustu." });
-    });
+    }
 });
 
 app.MapMetrics();

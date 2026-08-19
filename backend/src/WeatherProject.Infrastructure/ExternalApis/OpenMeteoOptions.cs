@@ -1,6 +1,8 @@
-// backend/src/WeatherProject.Infrastructure/ExternalApis/OpenMeteoOptions.cs
 namespace WeatherProject.Infrastructure.ExternalApis;
 
+// appsettings.json'daki "OpenMeteo" bolumunden okunuyor (Program.cs'de
+// Configure<OpenMeteoOptions> ile baglaniyor). Varsayilan degerler production URL'leri,
+// appsettings override etmezse zaten dogru calisir.
 public class OpenMeteoOptions
 {
     public const string SectionName = "OpenMeteo";

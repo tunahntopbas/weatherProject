@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ForecastStripComponent } from './forecast-strip.component';
 import { DailyForecast } from '../../core/models/weather-forecast.model';
 
+// gunluk noktalarin dogru hesaplandigi ve SVG path'inin olustugu test ediliyor
 describe('ForecastStripComponent', () => {
   let fixture: ComponentFixture<ForecastStripComponent>;
   let component: ForecastStripComponent;

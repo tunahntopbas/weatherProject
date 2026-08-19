@@ -7,6 +7,8 @@ import { FavoritesPageComponent } from './favorites-page.component';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { environment } from '../../../environments/environment';
 
+// FavoritesService'e sahte favori sehirler koyup sayfanin dogru kartlari
+// yukledigini ve karta tiklayinca yonlendirme yaptigini test ediyor
 describe('FavoritesPageComponent', () => {
   let fixture: ComponentFixture<FavoritesPageComponent>;
   let httpMock: HttpTestingController;

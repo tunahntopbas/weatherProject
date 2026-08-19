@@ -8,14 +8,20 @@ import { TURKISH_PROVINCES } from '../../core/data/turkish-provinces';
   templateUrl: './city-autocomplete.component.html',
   styleUrl: './city-autocomplete.component.scss',
 })
+// 81 il listesinden yaziya gore filtreleyip acilir liste gosteren arama kutusu.
+// Backend'e istek atmiyor, tamamen client-side calisiyor (TURKISH_PROVINCES
+// sabit dizisi uzerinde filtreleme) - sehir secilince disariya citySelected ile bildiriyor
 export class CityAutocompleteComponent {
   readonly citySelected = output<string>();
 
   readonly query = signal('');
   readonly isOpen = signal(false);
+  // ok tuslariyla gezinilen secili oneri - hicbiri secili degilken -1
   readonly activeIndex = signal(-1);
 
   readonly suggestions = computed(() => {
+    // toLocaleLowerCase('tr') onemli: normal toLowerCase() Turkce "I" harfini
+    // yanlis kucultur ("i" degil "ı" olmali), tr locale bunu dogru yapiyor
     const q = this.query().trim().toLocaleLowerCase('tr');
     if (!q) return [] as string[];
     return TURKISH_PROVINCES.filter((city) => city.toLocaleLowerCase('tr').startsWith(q)).slice(0, 8);
@@ -38,6 +44,7 @@ export class CityAutocompleteComponent {
   }
 
   onEnter(event: Event): void {
+    // once ok tuslariyla bir oneri secilmis mi diye bak
     const index = this.activeIndex();
     const options = this.suggestions();
     if (index >= 0 && index < options.length) {
@@ -46,6 +53,8 @@ export class CityAutocompleteComponent {
       return;
     }
 
+    // hicbir oneri secilmemisse, kullanici il adini birebir yazip direkt Enter'a
+    // basmis olabilir - listeden secmeden de arama yapabilsin diye tam eslesme kontrolu
     const exact = TURKISH_PROVINCES.find(
       (city) => city.toLocaleLowerCase('tr') === this.query().trim().toLocaleLowerCase('tr'),
     );

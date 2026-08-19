@@ -9,6 +9,9 @@ namespace WeatherProject.Infrastructure.Tests;
 
 public class RedisWeatherCacheRepositoryTests
 {
+    // gercek Redis kurmadan test edebilmek icin IDistributedCache'in bellek-ici
+    // implementasyonu kullaniliyor - RedisWeatherCacheRepository IDistributedCache
+    // arayuzune bagli oldugu icin arkada Redis mi bellek mi oldugunu bilmiyor bile
     private static IDistributedCache CreateInMemoryDistributedCache() =>
         new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 

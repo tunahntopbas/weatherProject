@@ -1,3 +1,6 @@
+// 81 il, sabit liste - sehir arama otomatik tamamlamasi (city-autocomplete
+// component'i) burada tanimli isimler disina cikmiyor, boylece backend'e
+// gonderilen sehir adi her zaman gecerli/tutarli oluyor
 export const TURKISH_PROVINCES: readonly string[] = [
   'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara',
   'Antalya', 'Ardahan', 'Artvin', 'Aydın', 'Balıkesir', 'Bartın', 'Batman',
